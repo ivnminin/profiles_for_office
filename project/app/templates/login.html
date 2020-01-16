@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %} Login {% endblock %}
+
+{% block nav %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="grid-container">
+        <div class="grid-x align-center" style="padding-top: 30px">
+            <div>
+
+                {% for category, message in  get_flashed_messages(with_categories=true) %}
+                    <div class="callout alert">
+                        <p>{{ message }}</p>
+                    </div>
+                {% endfor %}
+
+                <form class="log-in-form" action="" method="post">
+                    {{ form.csrf_token }}
+                    <h4 class="text-center">Форма авторизации</h4>
+                    <label>Логин:
+                        <input type="text" placeholder="Login" id="username" name="username">
+                    </label>
+                        <p style="color: red">
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            {% endif %}
+                        </p>
+                    <label>Пароль:
+                        <input type="password" placeholder="Password" id="password"  name="password">
+                    </label>
+                    <p style="color: red">
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        {% endif %}
+                    </p>
+                    <p>
+                        <input type="submit" class="button expanded" value="Авторизоваться ">
+                    </p>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

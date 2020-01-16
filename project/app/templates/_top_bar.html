@@ -1,0 +1,19 @@
+<div class="top-bar">
+    <div class="top-bar-left">
+        <ul class="menu">
+            <li><a href="{{ url_for('index') }}" style="margin: 0 15px">Главная</a></li>
+            <!--<li><a href="#">One</a></li>-->
+            <!--<li><a href="#">Two</a></li>-->
+        </ul>
+    </div>
+    <div class="top-bar-right">
+        <ul class="menu">
+            <li><a href="{{ url_for('profile') }}">Ваш профиль</a></li>
+            {% if current_user.is_anonymous %}
+                <li><a href="{{ url_for('login') }}" style="margin: 0 15px">Login</a></li>
+            {% else %}
+                <li><a href="{{ url_for('logout') }}" style="margin: 0 15px">Logout</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

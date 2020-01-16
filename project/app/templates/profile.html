@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% set active_page = 'index' %}
+
+{% block title %} Files list {% endblock %}
+
+{% block content %}
+
+    <div class="grid-container">
+        <div class="grid-x align-center" style="padding-top: 30px">
+            <div>
+                <h4>Данные по вашему профилю:</h4>
+                <br>
+                <table class="unstriped" style="max-width: 600px">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center">Поле</th>
+                            <th style="text-align: center">Информация</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ФИО:</td>
+                            <td>Фамилия</td>
+                        </tr>
+                        <tr>
+                            <td>Организация:</td>
+                            <td>Организация</td>
+                        </tr>
+                        <tr>
+                            <td>Группа:</td>
+                            <td>Группа  Группа Группа Группа Группа  Группа Группа Группа Группа  Группа Группа Группа</td>
+                        </tr>
+                        <tr>
+                            <td>Должность:</td>
+                            <td>Должность</td>
+                        </tr>
+                        <tr>
+                            <td>эл. адрес:</td>
+                            <td>эл. адрес</td>
+                        </tr>
+                        <tr>
+                            <td>Городской Телефон:</td>
+                            <td>Телефон</td>
+                        </tr>
+                        <tr>
+                            <td>Внутрений телефон:</td>
+                            <td>Телефон</td>
+                        </tr>
+                        <tr>
+                            <td>Роль:</td>
+                            <td>Пользователь</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
