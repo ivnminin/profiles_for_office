@@ -3,28 +3,35 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db, login_manager
+from app import app, db, login_manager
 
 
-class Role(db.Model, UserMixin):
+class Role(db.Model):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
     users = db.relationship('User', backref='role')
 
+    @classmethod
+    def insert_roles(cls):
+        for permission in app.config['PERMISSION']:
+            role = cls(name=permission)
+            db.session.add(role)
+            db.session.commit()
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(100))
-    second_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
+    name = db.Column(db.String(100), nullable=False)
+    second_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(100), unique=True)
     password_hash = db.Column(db.String(100), nullable=False)
@@ -34,9 +41,8 @@ class User(db.Model, UserMixin):
 
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'))
-
-    files = db.relationship('File', backref='user')
-    accesses = db.relationship('FileAccess', backref='user')
+    orders = db.relationship('Order', backref='user')
+    performer = db.relationship('GroupOrder', backref='user_performer')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -44,15 +50,30 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def is_administrator(self):
+        if self.role.name == 'admin':
+            return True
+
+    @property
+    def is_moderator(self):
+        if self.role.name == 'moderator':
+            return True
+
+    @property
+    def is_user(self):
+        if self.role.name == 'user':
+            return True
+
     def __repr__(self):
         return "<{}:{}>".format(self.id, self.username)
 
 
-class Organization(db.Model, UserMixin):
+class Organization(db.Model):
     __tablename__ = 'organizations'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(512))
+    name = db.Column(db.String(512), nullable=False)
     description = db.Column(db.String(255))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
@@ -60,11 +81,11 @@ class Organization(db.Model, UserMixin):
     departments = db.relationship('Department', backref='organization')
 
 
-class Department(db.Model, UserMixin):
+class Department(db.Model):
     __tablename__ = 'departments'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
@@ -78,6 +99,65 @@ def load_user(user_id):
     return db.session.query(User).get(user_id)
 
 
+class Order(db.Model):
+    __tablename__ = 'orders'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(2048), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    group_order_id = db.Column(db.Integer(), db.ForeignKey('group_orders.id'))
+    files = db.relationship('File', backref='order')
+
+
+group_order_services = db.Table('group_order_services',
+    db.Column('group_order_id', db.Integer, db.ForeignKey('group_orders.id')),
+    db.Column('service_id', db.Integer, db.ForeignKey('services.id'))
+)
+
+
+class GroupOrder(db.Model):
+    __tablename__ = 'group_orders'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(512))
+    status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['new'])
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    performer_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    orders = db.relationship('Order', backref='group_order')
+    results = db.relationship('Result', backref='group_order')
+    services = db.relationship('Service', secondary=group_order_services, backref='group_orders')
+
+
+class Service(db.Model):
+    __tablename__ = 'services'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+    description = db.Column(db.String(512))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+
+class Result(db.Model):
+    __tablename__ = 'results'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(512))
+    positive = db.Column(db.Boolean, default=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    group_order_id = db.Column(db.Integer(), db.ForeignKey('group_orders.id'))
+
+
 class File(db.Model):
     __tablename__ = 'files'
 
@@ -88,28 +168,10 @@ class File(db.Model):
     total_size = db.Column(db.Integer, nullable=False)
     timestamp_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
-
-    accesses = db.relationship('FileAccess', backref='file')
+    order_id = db.Column(db.Integer(), db.ForeignKey('orders.id'))
 
     def __str__(self):
         return self.original_name
 
     def __repr__(self):
         return "<{}:{}>".format(id, self.original_name)
-
-
-class FileAccess(db.Model):
-    __tablename__ = 'accesses'
-
-    id = db.Column(db.Integer, primary_key=True)
-    when_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-    file_id = db.Column(db.Integer(), db.ForeignKey('files.id'))
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
-
-    def __str__(self):
-        return self.who
-
-    def __repr__(self):
-        return "<{}:{}>".format(id, self.who)

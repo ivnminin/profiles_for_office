@@ -4,14 +4,15 @@ from flask_script import Manager, Shell
 from flask_migrate import MigrateCommand
 
 from app import app, db
-from app.models import User, File
+from app.models import Role, User, Organization, Department, Order, GroupOrder, Service, Result, File
 
 manager = Manager(app)
 
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(app=app, db=db, User=User, File=File)
+    return dict(app=app, db=db, Role=Role, User=User, Organization=Organization, Department=Department, Order=Order,
+                GroupOrder=GroupOrder, Service=Service, Result=Result, File=File)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
@@ -24,6 +25,14 @@ def start_project():
     """
     from app import db
     db.create_all()
+
+
+@app.cli.command('create-role')
+def create_role():
+    """
+    flask project create-role
+    """
+    Role.insert_roles()
 
 
 @app.cli.command('registration-user')

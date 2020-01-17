@@ -1,4 +1,5 @@
 import os, logging, uuid
+from functools import wraps
 
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
     make_response
@@ -6,12 +7,23 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user,current_user, logout_user
 
 from app import app
-from .models import db, User, File, FileAccess
+from .models import db, User, File
 from .forms import LoginForm, SearchForm
 
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
 log = logging.getLogger('pydrop')
+
+def admin_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if current_user.role.name == "admin":
+            return f(*args, **kwargs)
+        else:
+            flash("You need to be an admin to view this page.")
+            return redirect(url_for('index'))
+
+    return wrap
 
 
 @app.route('/login/', methods=['post', 'get'])
@@ -51,6 +63,11 @@ def index():
 def profile():
     return render_template('profile.html')
 
+@app.route('/admin-page')
+@login_required
+@admin_required
+def admin_page():
+    return render_template('admin.html')
 
 @app.route('/files-list/', methods=['GET', 'POST'])
 @login_required

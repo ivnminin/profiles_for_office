@@ -18,6 +18,8 @@ class BaseConfig:
 
     FILES_PER_PAGE = 10
 
+    PERMISSION = ['admin', 'moderator', 'user']
+    STATUS_TYPE = {'new': 'new', 'in_work': 'in_work', 'closed': 'closed', 'cancelled': 'cancelled'}
 
 POSTGRESQL = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
                 os.environ['DB_USER'],

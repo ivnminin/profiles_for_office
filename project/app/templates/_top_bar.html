@@ -2,8 +2,9 @@
     <div class="top-bar-left">
         <ul class="menu">
             <li><a href="{{ url_for('index') }}" style="margin: 0 15px">Главная</a></li>
-            <!--<li><a href="#">One</a></li>-->
-            <!--<li><a href="#">Two</a></li>-->
+            {% if current_user.is_administrator %}
+                <li><a href="{{ url_for('admin_page') }}" style="margin: 0 15px">Администратор</a></li>
+            {% endif %}
         </ul>
     </div>
     <div class="top-bar-right">
