@@ -23,7 +23,6 @@ def start_project():
     """
     start project start-project >>>db.create_all()
     """
-    from app import db
     db.create_all()
 
 
@@ -35,14 +34,99 @@ def create_role():
     Role.insert_roles()
 
 
+@app.cli.command('fake-data')
+def fake_data():
+    """
+    flask fake-data
+    """
+
+    # if not Role.query.first():
+    #     create_role()
+
+    r_a = db.session.query(Role).filter(Role.name == 'admin').first()
+    r_m = db.session.query(Role).filter(Role.name == 'moderator').first()
+    r_u = db.session.query(Role).filter(Role.name == 'user').first()
+
+    desc = 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. '\
+           'Cum sociis natoque penatibus et'
+
+    o = Organization(name='OOO Organization of Project', description=desc)
+
+    d = Department(name='Group of accountants', description=desc)
+    d.organization = o
+
+    d1 = Department(name='Group of lawyers', description=desc)
+    d1.organization = o
+
+    d2 = Department(name='Administrators', description=desc)
+    d2.organization = o
+
+    admin_user = User(name='Pety', second_name='Petrovich', last_name='Petrov', username='admin',
+                      email='admin@admin.admin', description='it is admin')
+    admin_user.set_password('pass')
+    admin_user.department = d2
+    admin_user.role = r_a
+
+    u = User(name='Ivan', second_name='Ivanovich', last_name='Ivanov', username='ivan', email='ivan@ivan.ivan',
+             description=desc)
+    u.set_password('pass')
+    u.department = d
+    u.role = r_u
+
+    u1 = User(name='Vladimir', second_name='Vladimirovich', last_name='Ivanov', username='vova', email='vova@vova.vova',
+             description=desc)
+    u1.set_password('pass')
+    u1.department = d1
+    u1.role = r_m
+
+    ord_ = Order(name='Problems with access to the Internet', description=desc)
+    ord_.user = u
+    ord1 = Order(name='The printer is not working', description=desc)
+    ord1.user = u1
+
+    db.session.add_all([ord_, ord1])
+    db.session.commit()
+
+    g = GroupOrder(name='General problem', description=desc)
+    g.user_performer = admin_user
+
+    ord_.group_order = g
+    ord1.group_order = g
+
+    db.session.add_all([ord_, ord1])
+    db.session.commit()
+
+    s = Service(name='The Internet', description=desc)
+    s1 = Service(name='Copying and copying equipment', description=desc)
+    g.services.append(s)
+    g.services.append(s1)
+
+    db.session.add_all([g, g])
+    db.session.commit()
+
+    r = Result(name='Performance of equipment', description='it is ok')
+    g.results.append(r)
+    r1 = Result(name='A small salary for a system administrator', description='It is necessary to increase the salary '
+                                                                              'of the system administrator')
+    r1.positive = True
+    g.results.append(r1)
+
+    db.session.add_all([g, g])
+    db.session.commit()
+
+
 @app.cli.command('registration-user')
 @click.argument('name')
+@click.argument('second_name')
+@click.argument('last_name')
+@click.argument('username')
 @click.argument('password')
-def registration_user(name, password):
+def registration_user(name, second_name, last_name, username, password):
     """
     registration user registration-user - <user_name> <password>
     """
-    user = User(username=name)
+
+    user = User(name=name, second_name=second_name, last_name=last_name, username=username)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()

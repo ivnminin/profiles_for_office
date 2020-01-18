@@ -129,10 +129,10 @@ class GroupOrder(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
-    performer_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    performer_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     orders = db.relationship('Order', backref='group_order')
     results = db.relationship('Result', backref='group_order')
-    services = db.relationship('Service', secondary=group_order_services, backref='group_orders')
+    services = db.relationship('Service', secondary=group_order_services, backref='group_order')
 
 
 class Service(db.Model):
