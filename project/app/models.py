@@ -34,6 +34,8 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(100), unique=True)
+    phone = db.Column(db.String(50))
+    internal_phone = db.Column(db.String(50))
     password_hash = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
@@ -43,6 +45,7 @@ class User(db.Model, UserMixin):
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'))
     orders = db.relationship('Order', backref='user')
     performer = db.relationship('GroupOrder', backref='user_performer')
+    position_id = db.Column(db.Integer(), db.ForeignKey('positions.id'))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -67,6 +70,18 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return "<{}:{}>".format(self.id, self.username)
+
+
+class Position(db.Model):
+    __tablename__ = 'positions'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(512), nullable=False, unique=True)
+    description = db.Column(db.String(255))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    users = db.relationship('User', backref='position')
 
 
 class Organization(db.Model):

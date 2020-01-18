@@ -26,6 +26,18 @@ def admin_required(f):
     return wrap
 
 
+def moderator_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if current_user.role.name == "moderator" or current_user.role.name == "admin":
+            return f(*args, **kwargs)
+        else:
+            flash("You need to be an moderator to view this page.")
+            return redirect(url_for('index'))
+
+    return wrap
+
+
 @app.route('/login/', methods=['post', 'get'])
 def login():
     if current_user.is_authenticated:
@@ -61,13 +73,57 @@ def index():
 @app.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html')
+    return render_template('profile.html', user=current_user)
+
+
+@app.route('/computer-orders')
+@login_required
+def computer_orders():
+    return render_template('computer_orders.html')
+
+
+@app.route('/group-orders')
+@login_required
+def group_orders():
+    return render_template('group_orders.html')
+
+
+@app.route('/my-computer-orders')
+@login_required
+def my_computer_orders():
+    return render_template('my_computer_orders.html')
+
+
+@app.route('/email-orders')
+@login_required
+def email_orders():
+    return render_template('email_orders.html')
+
+@app.route('/my-email-orders')
+@login_required
+def my_email_orders():
+    return render_template('my_email_orders.html')
+
+
+@app.route('/resources')
+@login_required
+def resources():
+    return render_template('resources.html')
+
 
 @app.route('/admin-page')
 @login_required
 @admin_required
 def admin_page():
     return render_template('admin.html')
+
+
+@app.route('/moderator-page')
+@login_required
+@moderator_required
+def moderator_page():
+    return render_template('moderator.html')
+
 
 @app.route('/files-list/', methods=['GET', 'POST'])
 @login_required

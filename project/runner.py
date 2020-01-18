@@ -4,15 +4,16 @@ from flask_script import Manager, Shell
 from flask_migrate import MigrateCommand
 
 from app import app, db
-from app.models import Role, User, Organization, Department, Order, GroupOrder, Service, Result, File
+from app.models import Role, User, Position, Organization, Department, Order, GroupOrder, Service, Result, File
 
 manager = Manager(app)
 
 
 @app.shell_context_processor
 def make_shell_context():
-    return dict(app=app, db=db, Role=Role, User=User, Organization=Organization, Department=Department, Order=Order,
-                GroupOrder=GroupOrder, Service=Service, Result=Result, File=File)
+    return dict(app=app, db=db, Role=Role, User=User, Position=Position, Organization=Organization,
+                Department=Department, Order=Order, GroupOrder=GroupOrder, Service=Service, Result=Result,
+                File=File)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
@@ -67,16 +68,21 @@ def fake_data():
     admin_user.department = d2
     admin_user.role = r_a
 
+    p = Position(name='Accountant', description=desc)
+    p1 = Position(name='Lawyer', description=desc)
+
     u = User(name='Ivan', second_name='Ivanovich', last_name='Ivanov', username='ivan', email='ivan@ivan.ivan',
              description=desc)
     u.set_password('pass')
     u.department = d
+    u.position = p
     u.role = r_u
 
     u1 = User(name='Vladimir', second_name='Vladimirovich', last_name='Ivanov', username='vova', email='vova@vova.vova',
              description=desc)
     u1.set_password('pass')
     u1.department = d1
+    u1.position = p1
     u1.role = r_m
 
     ord_ = Order(name='Problems with access to the Internet', description=desc)

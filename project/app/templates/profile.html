@@ -20,35 +20,35 @@
                     <tbody>
                         <tr>
                             <td>ФИО:</td>
-                            <td>Фамилия</td>
+                            <td>{{ user.name }} {{ user.second_name }} {{ user.last_name }}</td>
                         </tr>
                         <tr>
                             <td>Организация:</td>
-                            <td>Организация</td>
+                            <td>{% if user.department.organization %} {{ user.department.organization.name }} {% endif %}</td>
                         </tr>
                         <tr>
                             <td>Группа:</td>
-                            <td>Группа  Группа Группа Группа Группа  Группа Группа Группа Группа  Группа Группа Группа</td>
+                            <td>{{ user.department.name }}</td>
                         </tr>
                         <tr>
                             <td>Должность:</td>
-                            <td>Должность</td>
+                            <td>{{ user.position.name }}</td>
                         </tr>
                         <tr>
-                            <td>эл. адрес:</td>
-                            <td>эл. адрес</td>
+                            <td>Эл. адрес:</td>
+                            <td>{{ user.email|default('', true) }}</td>
                         </tr>
                         <tr>
                             <td>Городской Телефон:</td>
-                            <td>Телефон</td>
+                            <td>{{ user.phone|default('', true) }}</td>
                         </tr>
                         <tr>
                             <td>Внутрений телефон:</td>
-                            <td>Телефон</td>
+                            <td>{{ user.internal_phone|default('', true) }}</td>
                         </tr>
                         <tr>
                             <td>Роль:</td>
-                            <td>Пользователь</td>
+                            <td>{{ user.role.name }}</td>
                         </tr>
                     </tbody>
                 </table>
