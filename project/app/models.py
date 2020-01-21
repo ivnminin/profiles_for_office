@@ -44,6 +44,8 @@ class User(db.Model, UserMixin):
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'))
     orders = db.relationship('Order', backref='user')
+    notes = db.relationship('Note', backref='user')
+    consultations = db.relationship('Consultation', backref='user')
     performer = db.relationship('GroupOrder', backref='user_performer')
     position_id = db.Column(db.Integer(), db.ForeignKey('positions.id'))
 
@@ -78,6 +80,7 @@ class Position(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(512), nullable=False, unique=True)
     description = db.Column(db.String(255))
+    chief = db.Column(db.Boolean, default=False)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
@@ -112,6 +115,31 @@ class Department(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.query(User).get(user_id)
+
+
+class Note(db.Model):
+    __tablename__ = 'notes'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(2048))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+
+
+class Consultation(db.Model):
+    __tablename__ = 'consultations'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(2048))
+    organization = db.Column(db.String(512), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
 
 class Order(db.Model):

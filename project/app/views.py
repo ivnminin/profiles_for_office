@@ -91,13 +91,14 @@ def group_orders():
 @app.route('/my-computer-orders')
 @login_required
 def my_computer_orders():
-    return render_template('my_computer_orders.html')
+    return render_template('my_computer_orders.html', orders=current_user.orders)
 
 
 @app.route('/email-orders')
 @login_required
 def email_orders():
     return render_template('email_orders.html')
+
 
 @app.route('/my-email-orders')
 @login_required
@@ -109,6 +110,18 @@ def my_email_orders():
 @login_required
 def resources():
     return render_template('resources.html')
+
+
+@app.route('/notes')
+@login_required
+def notes():
+    return render_template('my_notes.html', notes=current_user.notes)
+
+
+@app.route('/consultations')
+@login_required
+def consultations():
+    return render_template('my_consultations.html', consultations=current_user.consultations)
 
 
 @app.route('/admin-page')

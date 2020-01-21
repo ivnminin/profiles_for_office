@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} My notes {% endblock %}
+
+{% block content %}
+
+    <div class="grid-container">
+        <div class="grid-x align-center" style="padding-top: 30px">
+            <div>
+                <h4>Мои заметки:</h4>
+                <br>
+                <table class="unstriped">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center">№</th>
+                            <th style="text-align: center">Информация</th>
+                            <th style="text-align: center; min-width: 200px" >Дата создания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for note in notes %}
+                            <tr>
+                                <td>{{ note.id }}</td>
+                                <td>{{ note.name }}</td>
+                                <td>{{ note.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

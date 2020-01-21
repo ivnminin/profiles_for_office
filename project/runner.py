@@ -4,7 +4,8 @@ from flask_script import Manager, Shell
 from flask_migrate import MigrateCommand
 
 from app import app, db
-from app.models import Role, User, Position, Organization, Department, Order, GroupOrder, Service, Result, File
+from app.models import Role, User, Position, Organization, Department, Order, GroupOrder, Service, Result, File, Note, \
+    Consultation
 
 manager = Manager(app)
 
@@ -13,7 +14,7 @@ manager = Manager(app)
 def make_shell_context():
     return dict(app=app, db=db, Role=Role, User=User, Position=Position, Organization=Organization,
                 Department=Department, Order=Order, GroupOrder=GroupOrder, Service=Service, Result=Result,
-                File=File)
+                File=File, Note=Note, Consultation=Consultation)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
@@ -118,6 +119,26 @@ def fake_data():
     g.results.append(r1)
 
     db.session.add_all([g, g])
+    db.session.commit()
+
+    n = Note(name='some note')
+    n1 = Note(name='some note 1')
+    n2 = Note(name='Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the'
+                   ' industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of '
+                   'type and scrambled it to make a type specimen book.')
+
+    c = Consultation(name='Lorem Ipsum is simply dummy text of the printing and typesetting industry',
+                     description='Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem '
+                                  'Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an '
+                                  'unknown printer took a galley of type and scrambled it to make a type specimen bok.',
+                     organization='Some Organization')
+
+    admin_user.notes.append(n)
+    admin_user.notes.append(n1)
+    admin_user.notes.append(n2)
+    admin_user.consultations.append(c)
+
+    db.session.add_all([admin_user])
     db.session.commit()
 
 
