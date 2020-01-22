@@ -46,6 +46,7 @@ class User(db.Model, UserMixin):
     orders = db.relationship('Order', backref='user')
     notes = db.relationship('Note', backref='user')
     consultations = db.relationship('Consultation', backref='user')
+    recommendations = db.relationship('Recommendation', backref='user')
     performer = db.relationship('GroupOrder', backref='user_performer')
     position_id = db.Column(db.Integer(), db.ForeignKey('positions.id'))
 
@@ -136,6 +137,18 @@ class Consultation(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(2048))
     organization = db.Column(db.String(512), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+
+
+class Recommendation(db.Model):
+    __tablename__ = 'recommendations'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(2048))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 

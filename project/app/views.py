@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user,current_user, logout_user
 
 from app import app
-from .models import db, User, File
+from .models import db, User, Order, GroupOrder, File
 from .forms import LoginForm, SearchForm
 
 
@@ -76,22 +76,53 @@ def profile():
     return render_template('profile.html', user=current_user)
 
 
+@app.route('/my-computer-orders')
+@login_required
+def my_computer_orders():
+    return render_template('my_computer_orders.html', orders=current_user.orders)
+
+
 @app.route('/computer-orders')
 @login_required
 def computer_orders():
-    return render_template('computer_orders.html')
+
+    orders = db.session.query(Order).all()
+
+    return render_template('computer_orders.html', orders=orders)
+
+
+@app.route('/computer-order/<id>')
+@login_required
+def computer_order(id):
+
+    order = db.session.query(Order).filter(Order.id == id).first_or_404()
+
+    return render_template('computer_order.html', order=order)
+
+
+@app.route('/add-computer-order')
+@login_required
+def add_computer_order():
+
+    return render_template('add_computer_order.html')
 
 
 @app.route('/group-orders')
 @login_required
 def group_orders():
-    return render_template('group_orders.html')
+
+    group_orders = db.session.query(GroupOrder).all()
+
+    return render_template('group_orders.html', group_orders=group_orders)
 
 
-@app.route('/my-computer-orders')
+@app.route('/group-order/<id>')
 @login_required
-def my_computer_orders():
-    return render_template('my_computer_orders.html', orders=current_user.orders)
+def group_order(id):
+
+    group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
+
+    return render_template('group_order.html', group_order=group_order)
 
 
 @app.route('/email-orders')
@@ -106,6 +137,12 @@ def my_email_orders():
     return render_template('my_email_orders.html')
 
 
+@app.route('/add-email-order')
+@login_required
+def add_email_order():
+    return render_template('add_email_order.html')
+
+
 @app.route('/resources')
 @login_required
 def resources():
@@ -117,11 +154,34 @@ def resources():
 def notes():
     return render_template('my_notes.html', notes=current_user.notes)
 
+@app.route('/add-note')
+@login_required
+def add_note():
+    return render_template('add_note.html')
+
 
 @app.route('/consultations')
 @login_required
 def consultations():
     return render_template('my_consultations.html', consultations=current_user.consultations)
+
+
+@app.route('/add-consultation')
+@login_required
+def add_consultation():
+    return render_template('add_consultation.html')
+
+
+@app.route('/recommendations')
+@login_required
+def recommendations():
+    return render_template('my_recommendations.html')
+
+
+@app.route('/add-recommendation')
+@login_required
+def add_recommendation():
+    return render_template('add_recommendation.html')
 
 
 @app.route('/admin-page')
