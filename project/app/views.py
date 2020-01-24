@@ -1,8 +1,9 @@
 import os, logging, uuid
 from functools import wraps
+from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
-    make_response
+    make_response, jsonify
 from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user,current_user, logout_user
 
@@ -13,6 +14,7 @@ from .forms import LoginForm, SearchForm
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
 log = logging.getLogger('pydrop')
+
 
 def admin_required(f):
     @wraps(f)
@@ -257,17 +259,32 @@ def upload():
     # log.info(request.form)
     # log.info(request.files)
 
-    files_store_folder = app.config['FILES_STORE_FOLDER']
+    title = request.form.get('title')
+    description = request.form.get('description')
+    order_id = request.form.get('order_id')
+
+    log.info('Start title: {} description: {} order_id:'.format(title, description, order_id))
+
+    files_store_folder = app.config['UPLOADED_PATH']
+    today_year = datetime.now().strftime('%Y')
+    files_store_folder = os.path.join(files_store_folder, today_year)
+    try:
+        os.mkdir(files_store_folder)
+    except FileExistsError:
+        pass
+
     hsh = request.form['dzuuid']
 
     file = request.files['file']
     original_filename = file.filename
 
     # I think keeping all the files in one folder is a bad idea.
-    sub_folder_name = hsh[0:2]
+    sub_folder_name = datetime.now().strftime('%d-%m-%Y')
     sub_folder = os.path.join(files_store_folder, sub_folder_name)
-    if not os.path.exists(sub_folder):
+    try:
         os.mkdir(sub_folder)
+    except FileExistsError:
+        pass
 
     tmp_path = os.path.join(sub_folder, secure_filename(original_filename))
     _, file_extension = os.path.splitext(tmp_path)
@@ -300,8 +317,9 @@ def upload():
                       "Was {} but we expected {} "
                       .format(original_filename, os.path.getsize(path_to_file), request.form['dztotalfilesize']))
             return make_response(('Size mismatch', 500))
+        elif current_chunk + 1 > app.config['DROPZONE_MAX_FILES']: return make_response(('Not valid, {}'.format(total_chunks), 500))
         else:
-            log.info('File {} has been uploaded successfully'.format(original_filename))
+            log.info('File {} has been uploaded successfully. total_chunks {}'.format(original_filename, total_chunks))
 
             hsh = uuid.uuid4().hex
             new_file = '{folder}/{name}'.format(folder=sub_folder, name=hsh + file_extension)
@@ -309,10 +327,16 @@ def upload():
 
             log.info('File {} has been renamed to {}'.format(original_filename, new_file))
 
-            file = File(original_name=original_filename, hash=hsh, user_id=current_user.id, path=new_file,
+            order = db.session.query(Order).filter(Order.id == order_id).first()
+
+            # if not order: return make_response(('Not exist order', 500))
+
+            file = File(original_name=original_filename, hash=hsh, path=new_file,
                         total_size=os.path.getsize(new_file))
 
-            db.session.add(file)
+            order.files.append(file)
+
+            db.session.add(order)
             db.session.commit()
 
     else:
@@ -322,37 +346,66 @@ def upload():
     return make_response(('Chunk upload successful', 200))
 
 
-@app.route('/search/', methods=['GET', 'POST'])
+# @app.route('/search/', methods=['GET', 'POST'])
+# @login_required
+# def search():
+#
+#     found_files = None
+#     was_search = False
+#     form = SearchForm()
+#     if form.validate_on_submit():
+#         file_name = form.file_name.data
+#         size_from = form.size_from.data
+#         size_to = form.size_to.data
+#
+#         if size_from > size_to:
+#             abort(404)
+#         was_search = True
+#         find_file = '{}%'.format(file_name)
+#
+#         if size_to and file_name:
+#             found_files = db.session.query(File).filter(
+#                 File.original_name.like(find_file) &
+#                 (File.total_size >= size_from) &
+#                 (File.total_size <= size_to)).all()
+#         elif size_to and not file_name:
+#             found_files = db.session.query(File).filter(
+#                 (File.total_size >= size_from) &
+#                 (File.total_size <= size_to)).all()
+#         elif file_name:
+#             found_files  = db.session.query(File).filter(File.original_name.like(find_file)).all()
+#
+#
+#     return render_template('search.html', form=form, files=found_files, was_search=was_search)
+
+
+# @app.route('/upload', methods=['POST'])
+# def handle_upload():
+#
+#     print('this')
+#     for key, f in request.files.items():
+#         if key.startswith('file'):
+#             f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
+#     return '', 204
+#
+#
+@app.route('/form', methods=['POST'])
 @login_required
-def search():
+def handle_form():
 
-    found_files = None
-    was_search = False
-    form = SearchForm()
-    if form.validate_on_submit():
-        file_name = form.file_name.data
-        size_from = form.size_from.data
-        size_to = form.size_to.data
+    title = request.form.get('title')
+    description = request.form.get('description')
 
-        if size_from > size_to:
-            abort(404)
-        was_search = True
-        find_file = '{}%'.format(file_name)
+    if not title or not description:
+        return jsonify(result='error', errors={'title': 'error_title', 'description': 'error_description'}), 404
 
-        if size_to and file_name:
-            found_files = db.session.query(File).filter(
-                File.original_name.like(find_file) &
-                (File.total_size >= size_from) &
-                (File.total_size <= size_to)).all()
-        elif size_to and not file_name:
-            found_files = db.session.query(File).filter(
-                (File.total_size >= size_from) &
-                (File.total_size <= size_to)).all()
-        elif file_name:
-            found_files  = db.session.query(File).filter(File.original_name.like(find_file)).all()
+    order = Order(name=title, description=description, user=current_user)
 
+    db.session.add(order)
+    db.session.commit()
 
-    return render_template('search.html', form=form, files=found_files, was_search=was_search)
+    return jsonify(result='success', data={'title': title, 'description': description, 'order': order.id,
+                                           'url':url_for('computer_orders')}), 200
 
 
 @app.errorhandler(404)

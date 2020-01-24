@@ -1,45 +1,153 @@
 {% extends 'base.html' %}
 <!--{% set active_page = 'index' %}-->
+{% block head %}
+    {{ super() }}
 
-{% block title %} Computer orders {% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='dropzone.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='basic.css') }}">
+
+    <script type="application/javascript" src="{{ url_for('static', filename='dropzone.js') }}"></script>
+
+{% endblock %}
+
+{% block title %} Add Computer order {% endblock %}
 
 {% block content %}
 
-    <div class="grid-container">
-        <div class="grid-x align-center" style="padding-top: 30px">
-            <div>
-                <h4>Все заявки на ПК:</h4>
-                <br>
-                <table class="unstriped">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center">№</th>
-                            <th style="text-align: center">Заявитель</th>
-                            <th style="text-align: center">Тема</th>
-                            <th style="text-align: center">Описание</th>
-                            <th style="text-align: center; min-width: 150px" >Дата создания</th>
-                            <th style="text-align: center" >Статус</th>
-                            <th style="text-align: center" >Исполнитель</th>
-                            <th style="text-align: center" >Посмотреть</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                            <tr>
-                                <td style="text-align: center">{{ order.id }}</td>
-                                <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
-                                <td>{{ order.name }}</td>
-                                <td>{{ order.description }}</td>
-                                <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                                <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
-                                <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
-                                <td style="text-align: center"><a href="{{ url_for('.computer_order', id=order.id) }}" class="button">Посмотреть</a></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <form method="POST" action="/upload"  enctype="multipart/form-data" name="dropzone">
+        <div class="grid-container">
+            <br>
+            <br>
+            <h5>Необходимо заполнить поля:</h5>
+            <div class="grid-x" style="padding-top: 10px">
+                <div class="medium-8 cell">
+                    <label>Тема заявки:
+                        <input id="title" type="text" placeholder="Тема заявки" name="title" autocomplete="off">
+                    </label>
+                    <p class="error-title" style="color: red"><p>
+                    <p class="help-text">Не больше 250 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Описание заявки:
+                        <textarea rows=3 cols="50" placeholder="Описание заявки" name="description"></textarea>
+                    </label>
+                    <p class="error-description" style="color: red"><p>
+                    <p class="help-text">Не больше 2000 символов.</p>
+                </div>
+                <div class="medium-8 cell" >
+                    <div class="dropzone dz-clickable"  id="dropper" style="border: 2px dashed #0087F7; margin: 10px 0 10px; min-height: 70px; width: 600px">
+
+                    </div>
+                    <p class="help-text">Прикрепите скриншот.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <input type="submit" id="submit" class="button" value="Submit and Upload">
+                </div>
             </div>
         </div>
-    </div>
+    </form>
+{% endblock %}
 
+{% block script%}
+    {{ super() }}
+    <script type="application/javascript">
+        Dropzone.options.dropper = {
+            paramName: 'file',
+            autoProcessQueue: false,
+            addRemoveLinks: true,
+            createImageThumbnails: false,
+            chunking: true,
+            forceChunking: true,
+            url: '/upload',
+            parallelUploads: 20,
+            maxFilesize: 5, // megabytes
+            maxFiles: 5,
+            chunkSize: 1000000, // bytes
+
+            init: function() {
+
+                // this.on("maxfilesexceeded", function(file){
+                //     alert("No more files please!");
+                // });
+                var submitButton = document.querySelector('form[name="dropzone"]');
+                myDropzone = this;
+
+                submitButton.addEventListener("submit", function(e) {
+
+                    e.preventDefault();
+
+                    var title = document.querySelector('input[name="title"]');
+                    var description = document.querySelector('textarea[name="description"]');
+
+                    this.formData = new FormData();
+                    this.formData.append("title", title.value);
+                    this.formData.append("description", description.value);
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/form");
+                    var errMsg = 'Что то пошло не так, попробуйте позже.';
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                document.querySelector('input[name="title"]').readOnly = true;
+                                document.querySelector('textarea[name="description"]').readOnly = true;
+                                var response_good = JSON.parse(xhr.responseText);
+
+                                var filesOnlyError = false;
+
+                                for (let i = 0; i < myDropzone.files.length; i++) {
+                                    if (myDropzone.files[i].status === 'queued') {
+                                        filesOnlyError = true;
+                                    }
+                                }
+
+                                if (myDropzone.files.length > 0 && filesOnlyError) {
+                                    myDropzone.response_ = response_good;
+                                    myDropzone.processQueue();
+                                }
+                                else {
+                                    window.location.href = response_good.data.url;
+                                }
+                            }
+                            else if (xhr.status === 404) {
+                                var response_bad = JSON.parse(xhr.responseText);
+                                var error_title = document.querySelector('p[class="error-title"]');
+                                var error_description = document.querySelector('p[class="error-description"]');
+                                error_title.innerText = response_bad.errors.title;
+                                error_description.innerText = response_bad.errors.description;
+                                console.log(response_bad.data);
+                                alert(response_bad.result);
+                            }
+                            else {
+                                alert(errMsg);
+                            }
+                        }
+
+                    };
+                    xhr.send(this.formData);
+                });
+                myDropzone.on("sending", function(file, xhr, formData) {
+                console.log('sending the end!');
+                formData.append("title", this.response_.data.title);
+                formData.append("description", this.response_.data.description);
+                formData.append("order_id", this.response_.data.order);
+                });
+                myDropzone.on("queuecomplete", function(file) {
+                    console.log('queuecomplete the end!');
+                    try {
+                        // window.location.href = this.response_.data.url;
+                    } catch (e) {
+                        console.log('error - e.name: ' +  e.name + ', msg: ' + e.message);
+                    }
+                });
+                myDropzone.on("complete", function(file) {
+                    console.log('complete the end!');
+                });
+            },
+        };
+                                // var myDropzone = Dropzone.forElement(".dropzone");
+                                // myDropzone.processQueue();
+
+    </script>
 {% endblock %}
