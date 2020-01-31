@@ -15,21 +15,22 @@
 
 {% block content %}
 
-        <form method="POST" action="/upload"  enctype="multipart/form-data" name="dropzone">
+    <form method="POST" action="/upload"  enctype="multipart/form-data" name="dropzone">
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="grid-container">
             <br>
             <br>
             <h5>Необходимо заполнить поля:</h5>
             <div class="grid-x" style="padding-top: 10px">
                 <div class="medium-8 cell">
-                    <label>Тема заявки:
+                    <label>Тема заявки: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
                         <input id="title" type="text" placeholder="Тема заявки" name="title" autocomplete="off">
                     </label>
                     <p class="error-title" style="color: red"><p>
                     <p class="help-text">Не больше 250 символов.</p>
                 </div>
                 <div class="medium-8 cell">
-                    <label>Описание заявки:
+                    <label>Описание заявки: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
                         <textarea rows=3 cols="50" placeholder="Описание заявки" name="description"></textarea>
                     </label>
                     <p class="error-description" style="color: red"><p>
@@ -39,7 +40,7 @@
                     <div class="dropzone dz-clickable"  id="dropper" style="border: 2px dashed #0087F7; margin: 10px 0 10px; min-height: 70px; width: 600px">
 
                     </div>
-                    <p class="help-text">Прикрепите скриншот.</p>
+                    <p class="help-text">Прикрепите скриншот. Количество файлов не больше 5 шт., максимальный размер одного файла не больше 5 Мб. </p>
                 </div>
                 <div class="medium-8 cell">
                     <input type="submit" id="submit" class="button" value="Submit and Upload">
@@ -53,6 +54,8 @@
     {{ super() }}
     <script type="application/javascript">
         Dropzone.options.dropper = {
+            dictDefaultMessage: "Нажмите в данное поле и выберете скриншоты.  Количество файлов не больше 5 шт., " +
+                                 "максимальный размер одного файла не больше 5 Мб.",
             paramName: 'file',
             autoProcessQueue: false,
             addRemoveLinks: true,
@@ -63,13 +66,23 @@
             parallelUploads: 20,
             maxFilesize: 5, // megabytes
             maxFiles: 5,
-            chunkSize: 1000000, // bytes
+            chunkSize: 5000000, // bytes
 
             init: function() {
 
                 // this.on("maxfilesexceeded", function(file){
-                //     alert("No more files please!");
+                //     if (!alert_msg) {
+                //         alert("Вы добавили много файлов, лишние не буду добавлены в заявку! " +
+                //               "Количество файлов не больше 5 шт., максимальный размер одного файла не больше 5 Мб.");
+                //     }
                 // });
+
+                this.on("error", function(file, message) {
+                    alert(' Файл с именем ' + file.name + ' не будет добавлен, так как он не отвечает требованиям. '
+                    + message);
+                    this.removeFile(file);
+                });
+
                 var submitButton = document.querySelector('form[name="dropzone"]');
                 myDropzone = this;
 
@@ -83,9 +96,10 @@
                     this.formData = new FormData();
                     this.formData.append("title", title.value);
                     this.formData.append("description", description.value);
-
+                    this._csrftoken = document.querySelector('input[name="csrf_token"]').value;
                     var xhr = new XMLHttpRequest();
                     xhr.open("POST", "/form");
+                    xhr.setRequestHeader('X-CSRFToken', this._csrftoken);
                     var errMsg = 'Что то пошло не так, попробуйте позже.';
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState === 4) {
@@ -114,10 +128,12 @@
                                 var response_bad = JSON.parse(xhr.responseText);
                                 var error_title = document.querySelector('p[class="error-title"]');
                                 var error_description = document.querySelector('p[class="error-description"]');
+                                // error_title.innerText = response_bad.errors.title;
+                                // error_description.innerText = response_bad.errors.description;
                                 error_title.innerText = response_bad.errors.title;
                                 error_description.innerText = response_bad.errors.description;
-                                console.log(response_bad.data);
-                                alert(response_bad.result);
+                                console.log(response_bad.errors);
+                                // alert('Ошибка, пропробуйте позде, 404 error');
                             }
                             else {
                                 alert(errMsg);
@@ -128,20 +144,22 @@
                     xhr.send(this.formData);
                 });
                 myDropzone.on("sending", function(file, xhr, formData) {
-                console.log('sending the end!');
-                formData.append("title", this.response_.data.title);
-                formData.append("description", this.response_.data.description);
-                formData.append("order_id", this.response_.data.order);
+                    console.log('sending the end!');
+                    console.log(xhr.getAllResponseHeaders());
+                    formData.append("title", this.response_.data.title);
+                    formData.append("description", this.response_.data.description);
+                    formData.append("order_id", this.response_.data.order);
+
                 });
-                myDropzone.on("queuecomplete", function(file) {
+                myDropzone.on("queuecomplete", function(file, xhr, formData) {
                     console.log('queuecomplete the end!');
                     try {
-                        // window.location.href = this.response_.data.url;
+                        window.location.href = this.response_.data.url;
                     } catch (e) {
                         console.log('error - e.name: ' +  e.name + ', msg: ' + e.message);
                     }
                 });
-                myDropzone.on("complete", function(file) {
+                myDropzone.on("complete", function(file, xhr, formData) {
                     console.log('complete the end!');
                 });
             },

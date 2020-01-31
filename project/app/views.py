@@ -7,9 +7,9 @@ from flask import render_template, request, redirect, url_for, flash, abort, sen
 from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user,current_user, logout_user
 
-from app import app
-from .models import db, User, Order, GroupOrder, File
-from .forms import LoginForm, SearchForm
+from app import app, csrf
+from .models import db, User, Order, GroupOrder, File, Consultation
+from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm
 
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
@@ -105,8 +105,8 @@ def computer_order(id):
 @app.route('/add-computer-order')
 @login_required
 def add_computer_order():
-
-    return render_template('add_computer_order.html')
+    form = OrderComputerForm()
+    return render_template('add_computer_order.html', form=form)
 
 
 @app.route('/group-orders')
@@ -168,10 +168,23 @@ def consultations():
     return render_template('my_consultations.html', consultations=current_user.consultations)
 
 
-@app.route('/add-consultation')
+@app.route('/add-consultation', methods=['GET', 'POST'])
 @login_required
 def add_consultation():
-    return render_template('add_consultation.html')
+
+    form = ConsultationForm()
+    if request.method == 'POST' and form.validate_on_submit():
+
+        consultation = Consultation(name=form.title.data, description=form.description.data,
+                                    organization=form.organization.data, user=current_user)
+
+        db.session.add(consultation)
+        db.session.commit()
+
+        flash("Added consultations", 'success')
+        return redirect(url_for('consultations'))
+
+    return render_template('add_consultation.html', form=form)
 
 
 @app.route('/recommendations')
@@ -252,12 +265,9 @@ def file_upload():
 
 
 @app.route('/upload', methods=['POST'])
+@csrf.exempt
 @login_required
 def upload():
-    # need for debug
-    # # Route to deal with the uploaded chunks
-    # log.info(request.form)
-    # log.info(request.files)
 
     title = request.form.get('title')
     description = request.form.get('description')
@@ -288,6 +298,8 @@ def upload():
 
     tmp_path = os.path.join(sub_folder, secure_filename(original_filename))
     _, file_extension = os.path.splitext(tmp_path)
+    if not file_extension:
+        file_extension = '.no_file_extension'
     new_file_name = hsh + file_extension
     path_to_file = '{folder}/{name}'.format(folder=sub_folder, name=new_file_name)
 
@@ -312,12 +324,12 @@ def upload():
 
     if current_chunk + 1 == total_chunks:
         # This was the last chunk, the file should be complete and the size we expect
-        if os.path.getsize(path_to_file) != int(request.form['dztotalfilesize']):
+        if os.path.getsize(path_to_file) != int(request.form['dztotalfilesize']) \
+                or os.path.getsize(path_to_file) > app.config['UPLOADED_MAX_FILES']:
             log.error("File {} was completed, but has a size mismatch. "
                       "Was {} but we expected {} "
                       .format(original_filename, os.path.getsize(path_to_file), request.form['dztotalfilesize']))
             return make_response(('Size mismatch', 500))
-        elif current_chunk + 1 > app.config['DROPZONE_MAX_FILES']: return make_response(('Not valid, {}'.format(total_chunks), 500))
         else:
             log.info('File {} has been uploaded successfully. total_chunks {}'.format(original_filename, total_chunks))
 
@@ -339,6 +351,9 @@ def upload():
             db.session.add(order)
             db.session.commit()
 
+            if len(order.files) > app.config['DROPZONE_MAX_FILES']:
+                return make_response(('Not valid, {}'.format(len(order.files)), 500))
+
     else:
         log.debug('Chunk {} of {} for file {} complete {}'
                   .format(current_chunk + 1, total_chunks, original_filename, request.form))
@@ -346,58 +361,18 @@ def upload():
     return make_response(('Chunk upload successful', 200))
 
 
-# @app.route('/search/', methods=['GET', 'POST'])
-# @login_required
-# def search():
-#
-#     found_files = None
-#     was_search = False
-#     form = SearchForm()
-#     if form.validate_on_submit():
-#         file_name = form.file_name.data
-#         size_from = form.size_from.data
-#         size_to = form.size_to.data
-#
-#         if size_from > size_to:
-#             abort(404)
-#         was_search = True
-#         find_file = '{}%'.format(file_name)
-#
-#         if size_to and file_name:
-#             found_files = db.session.query(File).filter(
-#                 File.original_name.like(find_file) &
-#                 (File.total_size >= size_from) &
-#                 (File.total_size <= size_to)).all()
-#         elif size_to and not file_name:
-#             found_files = db.session.query(File).filter(
-#                 (File.total_size >= size_from) &
-#                 (File.total_size <= size_to)).all()
-#         elif file_name:
-#             found_files  = db.session.query(File).filter(File.original_name.like(find_file)).all()
-#
-#
-#     return render_template('search.html', form=form, files=found_files, was_search=was_search)
-
-
-# @app.route('/upload', methods=['POST'])
-# def handle_upload():
-#
-#     print('this')
-#     for key, f in request.files.items():
-#         if key.startswith('file'):
-#             f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
-#     return '', 204
-#
-#
 @app.route('/form', methods=['POST'])
 @login_required
 def handle_form():
 
+    form = OrderComputerForm()
+
+    if not form.validate_on_submit():
+
+        return jsonify(result='error', errors={'title': form.title.errors, 'description': form.description.errors}), 404
+
     title = request.form.get('title')
     description = request.form.get('description')
-
-    if not title or not description:
-        return jsonify(result='error', errors={'title': 'error_title', 'description': 'error_description'}), 404
 
     order = Order(name=title, description=description, user=current_user)
 

@@ -7,6 +7,17 @@
 
     <div class="grid-container">
         <div class="grid-x align-center" style="padding-top: 30px">
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="callout success">
+                        {% for message in messages %}
+                            <p>{{ message | safe }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
             <div>
                 <h4>Мои Консультации:</h4>
                 <br>
