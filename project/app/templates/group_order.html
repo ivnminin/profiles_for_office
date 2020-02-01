@@ -5,67 +5,66 @@
 
 {% block content %}
 
-    <div class="grid-container">
-        <div class="grid-x align-center" style="padding-top: 30px">
-            <div>
-                <h4>Группа заявок на ПК:</h4>
-                <br>
-                <table class="unstriped">
-                    <thead>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
+            <h4>Группа заявок на ПК:</h4>
+            <br>
+            <table class="unstriped">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center; min-width: 150px">Дата создания</th>
+                        <th style="text-align: center">Статус</th>
+                        <th style="text-align: center">Исполнитель</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center">{{ group_order.id }}</td>
+                        <td>{{ group_order.name }}</td>
+                        <td>{{ group_order.description }}</td>
+                        <td style="text-align: center">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                        <td style="text-align: center">{{ group_order.status | view_status }}</td>
+                        <td style="text-align: center">{{ group_order.user_performer.name }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <br>
+            <h5>Заявки учатники данной группы:</h5>
+            <br>
+            <table class="unstriped">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Заявитель</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center; min-width: 150px">Дата создания</th>
+                        <th style="text-align: center">Статус</th>
+                        <th style="text-align: center">Исполнитель</th>
+                        <th style="text-align: center">Посмотреть</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in group_order.orders %}
                         <tr>
-                            <th style="text-align: center">№</th>
-                            <th style="text-align: center">Тема</th>
-                            <th style="text-align: center">Описание</th>
-                            <th style="text-align: center; min-width: 150px">Дата создания</th>
-                            <th style="text-align: center">Статус</th>
-                            <th style="text-align: center">Исполнитель</th>
+                            <td style="text-align: center">{{ order.id }}</td>
+                            <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
+                            <td>{{ order.name }}</td>
+                            <td>{{ order.description }}</td>
+                            <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center">{{ order.group_order.status | view_status}}</td>
+                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
+                            <td style="text-align: center"><a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть</a></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="text-align: center">{{ group_order.id }}</td>
-                            <td>{{ group_order.name }}</td>
-                            <td>{{ group_order.description }}</td>
-                            <td style="text-align: center">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center">{{ group_order.status | view_status }}</td>
-                            <td style="text-align: center">{{ group_order.user_performer.name }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <br>
-                <br>
-                <h5>Заявки учатники данной группы:</h5>
-                <br>
-                <table class="unstriped">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center">№</th>
-                            <th style="text-align: center">Заявитель</th>
-                            <th style="text-align: center">Тема</th>
-                            <th style="text-align: center">Описание</th>
-                            <th style="text-align: center; min-width: 150px">Дата создания</th>
-                            <th style="text-align: center">Статус</th>
-                            <th style="text-align: center">Исполнитель</th>
-                            <th style="text-align: center">Посмотреть</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in group_order.orders %}
-                            <tr>
-                                <td style="text-align: center">{{ order.id }}</td>
-                                <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
-                                <td>{{ order.name }}</td>
-                                <td>{{ order.description }}</td>
-                                <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                                <td style="text-align: center">{{ order.group_order.status | view_status}}</td>
-                                <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
-                                <td style="text-align: center"><a href="{{ url_for('.computer_order', id=order.id) }}" class="button">Посмотреть</a></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+
 
 {% endblock %}

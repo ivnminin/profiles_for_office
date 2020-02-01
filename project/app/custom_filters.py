@@ -18,4 +18,16 @@ def generate_custom_filter(app):
 
         return value
 
+    def first_symbols(value, count_symbols=None):
+        c = count_symbols or 255
+
+        dots = ''
+        if len(value) > c:
+            dots = ' ...'
+
+        new_value = '{}{}'.format(value[0:c], dots)
+
+        return new_value
+
     environment.DEFAULT_FILTERS['view_status'] = view_status
+    environment.DEFAULT_FILTERS['first_symbols'] = first_symbols

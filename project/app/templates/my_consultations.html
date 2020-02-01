@@ -4,9 +4,8 @@
 {% block title %} My notes {% endblock %}
 
 {% block content %}
-
-    <div class="grid-container">
-        <div class="grid-x align-center" style="padding-top: 30px">
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
 
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
@@ -18,33 +17,33 @@
                 {% endif %}
             {% endwith %}
 
-            <div>
-                <h4>Мои Консультации:</h4>
-                <br>
-                <table class="unstriped">
-                    <thead>
+        <div>
+            <h4>Мои Консультации:</h4>
+            <br>
+            <table class="unstriped">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center">Организация</th>
+                        <th style="text-align: center; min-width: 200px" >Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for consultation in consultations %}
                         <tr>
-                            <th style="text-align: center">№</th>
-                            <th style="text-align: center">Тема</th>
-                            <th style="text-align: center">Описание</th>
-                            <th style="text-align: center">Организация</th>
-                            <th style="text-align: center; min-width: 200px" >Дата создания</th>
+                            <td>{{ consultation.id }}</td>
+                            <td>{{ consultation.name }}</td>
+                            <td>{{ consultation.description }}</td>
+                            <td>{{ consultation.organization }}</td>
+                            <td>{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for consultation in consultations %}
-                            <tr>
-                                <td>{{ consultation.id }}</td>
-                                <td>{{ consultation.name }}</td>
-                                <td>{{ consultation.description }}</td>
-                                <td>{{ consultation.organization }}</td>
-                                <td>{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+
 
 {% endblock %}

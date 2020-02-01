@@ -5,37 +5,63 @@
 
 {% block content %}
 
-    <div class="grid-container">
-        <div class="grid-x align-center" style="padding-top: 30px">
-            <div>
-                <h4>Заявка на ПК:</h4>
-                <br>
-                <table class="unstriped">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center">№</th>
-                            <th style="text-align: center">Заявитель</th>
-                            <th style="text-align: center">Тема</th>
-                            <th style="text-align: center">Описание</th>
-                            <th style="text-align: center; min-width: 150px">Дата создания</th>
-                            <th style="text-align: center">Статус</th>
-                            <th style="text-align: center">Исполнитель</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="text-align: center">{{ order.id }}</td>
-                            <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
-                            <td>{{ order.name }}</td>
-                            <td>{{ order.description }}</td>
-                            <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
-                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
+            <h4>Заявка на ПК:</h4>
+            <br>
+            <table class="hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Заявитель</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center; min-width: 300px">Описание</th>
+                        <th style="text-align: center; min-width: 150px" >Дата создания</th>
+                        <th style="text-align: center" >Статус</th>
+                        <th style="text-align: center" >Исполнитель</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center">{{ order.id }}</td>
+                        <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
+                        <td>{{ order.name }}</td>
+                        <td>{{ order.description}}</td>
+                        <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                        <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
+                        <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if order.files %}
+                <div class="medium-8 cell" >
+                    <table class="hover">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">№</th>
+                                <th style="text-align: center">Файл</th>
+                                <th style="text-align: center">Дата</th>
+                                <th style="text-align: center">Скачать</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in order.files %}
+                                <tr>
+                                    <td style="text-align: center">{{ file.id }}</td>
+                                    <td style="text-align: center">{{ file.original_name }}</td>
+                                    <td style="text-align: center">{{ file.timestamp_created.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                                    <td scope="col"><a href="{{ url_for('download', file_hash=file.hash) }}">Скачать</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <h4>Скриншотов нет!</h4>
+            {% endif %}
         </div>
     </div>
+
 
 {% endblock %}

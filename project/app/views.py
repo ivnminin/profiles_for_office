@@ -88,7 +88,7 @@ def my_computer_orders():
 @login_required
 def computer_orders():
 
-    orders = db.session.query(Order).all()
+    orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
 
     return render_template('computer_orders.html', orders=orders)
 
@@ -107,6 +107,17 @@ def computer_order(id):
 def add_computer_order():
     form = OrderComputerForm()
     return render_template('add_computer_order.html', form=form)
+
+
+@app.route('/edit-computer-order/<id>')
+@login_required
+def edit_computer_order(id):
+
+    order = db.session.query(Order).filter(Order.id == id, Order.user==current_user,
+                                           Order.group_order == None).first_or_404()
+    form = OrderComputerForm(order)
+
+    return render_template('edit_computer_order.html', form=form, order=order)
 
 
 @app.route('/group-orders')
@@ -229,40 +240,6 @@ def files_list():
     return render_template('files_list.html', files=files.items, next_url=next_url, prev_url=prev_url)
 
 
-@app.route('/download/<file_hash>')
-@login_required
-def download(file_hash):
-    file = db.session.query(File).filter(File.hash == file_hash).first_or_404()
-    path_to_file = file.path
-
-    @after_this_request
-    def lock_access(response):
-        access = FileAccess(file_id=file.id, user_id=current_user.id)
-        db.session.add(access)
-        db.session.commit()
-
-        return response
-
-    # #FIXME rattle - if you have very more clicks on download button. it's problem.
-    # access = FileAccess(file_id=file.id, user_id=current_user.id)
-    # db.session.add(access)
-    # db.session.commit()
-
-    return send_file(path_to_file, as_attachment=True, cache_timeout=0)
-
-
-@app.route('/file-card/<hash_id>')
-@login_required
-def file_card(hash_id):
-    file = db.session.query(File).filter(File.hash == hash_id).first_or_404()
-
-    return render_template('file_card.html', file=file)
-
-@app.route('/file-upload/')
-@login_required
-def file_upload():
-    return render_template('file_upload.html')
-
 
 @app.route('/upload', methods=['POST'])
 @csrf.exempt
@@ -373,14 +350,51 @@ def handle_form():
 
     title = request.form.get('title')
     description = request.form.get('description')
+    order_id = request.form.get('order')
 
-    order = Order(name=title, description=description, user=current_user)
+    if order_id:
+        order = db.session.query(Order).filter(Order.id == int(order_id)).first_or_404()
+        if order.group_order:
+            return jsonify(result='error',
+                           errors={'error_msg': 'you can not edit this order, sorry'}), 404
+
+        order.name = title
+        order.description = description
+        flash("Edited order", 'success')
+    else:
+        order = Order(name=title, description=description, user=current_user)
+        flash("Added order", 'success')
 
     db.session.add(order)
     db.session.commit()
 
     return jsonify(result='success', data={'title': title, 'description': description, 'order': order.id,
                                            'url':url_for('computer_orders')}), 200
+
+
+@app.route('/download/<file_hash>')
+@login_required
+def download(file_hash):
+
+    file = db.session.query(File).filter(File.hash == file_hash).first_or_404()
+    path_to_file = file.path
+
+    return send_file(path_to_file, as_attachment=True, cache_timeout=0)
+
+
+@app.route('/delete-order-files/<id>')
+@login_required
+def delete_order_files(id):
+
+    order = db.session.query(Order).filter(Order.id == id,
+                                           Order.user==current_user, Order.group_order == None).first_or_404()
+
+    for file in order.files:
+        db.session.delete(file)
+        db.session.commit()
+
+    flash("Files was deleted", 'success')
+    return redirect(url_for('edit_computer_order', id=order.id))
 
 
 @app.errorhandler(404)
