@@ -20,7 +20,8 @@
         <div>
             <h4>Мои Консультации:</h4>
             <br>
-            <table class="unstriped">
+            {% if consultations %}
+                <table class="unstriped">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
@@ -42,6 +43,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+                <p style="text-align: center">Нет консультаций.</p>
+            {% endif %}
         </div>
     </div>
 

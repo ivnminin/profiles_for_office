@@ -4,10 +4,7 @@ def generate_custom_filter(app):
 
     def view_status(value):
 
-        if app.config['STATUS_TYPE']['new'] == value:
-            return 'Новая'
-
-        elif app.config['STATUS_TYPE']['in_work'] == value:
+        if app.config['STATUS_TYPE']['in_work'] == value:
             return 'В работе'
 
         elif app.config['STATUS_TYPE']['closed'] == value:
@@ -16,7 +13,7 @@ def generate_custom_filter(app):
         elif app.config['STATUS_TYPE']['cancelled'] == value:
             return 'Отменена'
 
-        return value
+        return 'Новая'
 
     def first_symbols(value, count_symbols=None):
         c = count_symbols or 255

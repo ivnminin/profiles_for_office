@@ -181,7 +181,7 @@ class GroupOrder(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(512))
-    status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['new'])
+    status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['in_work'])
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 

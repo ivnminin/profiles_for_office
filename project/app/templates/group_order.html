@@ -6,42 +6,32 @@
 {% block content %}
 
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
-        <div class="cell">
+
+        <div class="cell small-10 large-offset-1">
             <h4>Группа заявок на ПК:</h4>
-            <br>
-            <table class="unstriped">
-                <thead>
-                    <tr>
-                        <th style="text-align: center">№</th>
-                        <th style="text-align: center">Тема</th>
-                        <th style="text-align: center">Описание</th>
-                        <th style="text-align: center; min-width: 150px">Дата создания</th>
-                        <th style="text-align: center">Статус</th>
-                        <th style="text-align: center">Исполнитель</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="text-align: center">{{ group_order.id }}</td>
-                        <td>{{ group_order.name }}</td>
-                        <td>{{ group_order.description }}</td>
-                        <td style="text-align: center">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                        <td style="text-align: center">{{ group_order.status | view_status }}</td>
-                        <td style="text-align: center">{{ group_order.user_performer.name }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <br>
+            <hr style="max-width: none; padding-top: 10px;">
+            <div><p style="display: inline;"><strong>Номер заявки: </strong></p><p style="display: inline;">{{ group_order.id }}</p></div>
+            <div><p style="display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ group_order.name }}</p></div>
+            <div><p style="display: inline;"><strong>Описание </strong></p><p style="display: inline;">{{ group_order.description }}</p></div>
+            <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
+            <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ group_order.status | view_status }}</p></div>
+            <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{{ group_order.user_performer.name }}</p></div>
+        </div>
+    </div>
+
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
             <br>
             <h5>Заявки учатники данной группы:</h5>
             <br>
-            <table class="unstriped">
+            {% if group_order.orders %}
+                <table class="unstriped">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
                         <th style="text-align: center">Заявитель</th>
                         <th style="text-align: center">Тема</th>
-                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center; min-width: 500px">Описание</th>
                         <th style="text-align: center; min-width: 150px">Дата создания</th>
                         <th style="text-align: center">Статус</th>
                         <th style="text-align: center">Исполнитель</th>
@@ -54,7 +44,7 @@
                             <td style="text-align: center">{{ order.id }}</td>
                             <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
                             <td>{{ order.name }}</td>
-                            <td>{{ order.description }}</td>
+                            <td>{{ order.description | first_symbols }}</td>
                             <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center">{{ order.group_order.status | view_status}}</td>
                             <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
@@ -63,6 +53,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+                <p style="text-align: center">Ёще нет заявок в данной группе</p>
+            {% endif %}
         </div>
     </div>
 

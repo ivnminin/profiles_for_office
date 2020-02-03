@@ -17,7 +17,7 @@ class BaseConfig:
     FILES_PER_PAGE = 10
 
     PERMISSION = ['admin', 'moderator', 'user']
-    STATUS_TYPE = {'new': 'new', 'in_work': 'in_work', 'closed': 'closed', 'cancelled': 'cancelled'}
+    STATUS_TYPE = {'in_work': 'in_work', 'closed': 'closed', 'cancelled': 'cancelled'}
 
     UPLOADED_PATH = os.path.join(app_dir, 'files_store_folder')
     UPLOADED_MAX_FILES = 7 * 1024 * 1024

@@ -8,8 +8,8 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user,current_user, logout_user
 
 from app import app, csrf
-from .models import db, User, Order, GroupOrder, File, Consultation
-from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm
+from .models import db, Role, User, Order, GroupOrder, File, Consultation
+from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm
 
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
@@ -81,14 +81,35 @@ def profile():
 @app.route('/my-computer-orders')
 @login_required
 def my_computer_orders():
-    return render_template('my_computer_orders.html', orders=current_user.orders)
+
+    filter = request.args.get('filter')
+    if filter == 'new':
+        orders = db.session.query(Order).filter(Order.user == current_user, Order.group_order == None)\
+                                        .order_by(db.desc(Order.updated_on)).all()
+    elif filter:
+        orders = db.session.query(Order)\
+            .filter(Order.user==current_user, Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
+            .order_by(db.desc(Order.updated_on)).all()
+    else:
+        orders = current_user.orders
+
+    return render_template('my_computer_orders.html', orders=orders)
 
 
 @app.route('/computer-orders')
 @login_required
 def computer_orders():
 
-    orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
+    filter = request.args.get('filter')
+    if filter == 'new':
+        orders = db.session.query(Order).filter(Order.group_order == None)\
+                                        .order_by(db.desc(Order.updated_on)).all()
+    elif filter:
+        orders = db.session.query(Order)\
+            .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
+            .order_by(db.desc(Order.updated_on)).all()
+    else:
+        orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
 
     return render_template('computer_orders.html', orders=orders)
 
@@ -98,6 +119,11 @@ def computer_orders():
 def computer_order(id):
 
     order = db.session.query(Order).filter(Order.id == id).first_or_404()
+    if current_user.is_moderator:
+        group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == app.config['STATUS_TYPE']['in_work'])\
+                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
+
+        return render_template('computer_order.html', order=order, group_orders=group_orders)
 
     return render_template('computer_order.html', order=order)
 
@@ -124,7 +150,17 @@ def edit_computer_order(id):
 @login_required
 def group_orders():
 
-    group_orders = db.session.query(GroupOrder).all()
+    filter = request.args.get('filter')
+    if filter == 'new':
+        group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == None)\
+                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
+    elif filter:
+        group_orders = db.session.query(GroupOrder)\
+                                 .filter(GroupOrder.status==filter)\
+                                 .order_by(db.desc(GroupOrder.updated_on)).all()
+    else:
+        group_orders = db.session.query(GroupOrder).all()
+
 
     return render_template('group_orders.html', group_orders=group_orders)
 
@@ -192,7 +228,7 @@ def add_consultation():
         db.session.add(consultation)
         db.session.commit()
 
-        flash("Added consultations", 'success')
+        flash("Added consultation", 'success')
         return redirect(url_for('consultations'))
 
     return render_template('add_consultation.html', form=form)
@@ -222,6 +258,54 @@ def admin_page():
 @moderator_required
 def moderator_page():
     return render_template('moderator.html')
+
+
+@app.route('/moderator-page/new-computer-orders')
+@login_required
+@moderator_required
+def moderator_page_new_computer_orders():
+
+    orders = db.session.query(Order).filter(Order.group_order == None) \
+                                    .order_by(db.desc(Order.updated_on)).all()
+
+    return render_template('moderator_new_computer_orders.html', orders=orders)
+
+@app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-group-order/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_group_order(id=None):
+
+    users_performer = db.session.query(Role).filter(Role.name=='moderator').first().users
+
+    if id:
+        group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
+
+        form = GroupOrderForm(group_order, users_performer)
+        if form.validate_on_submit():
+            user_performer = db.session.query(User).filter(User.id==form.users_performer.data).first_or_404()
+            group_order.name = form.title.data,
+            group_order.name = form.description.data
+            group_order.user_performer = user_performer
+            db.session.add(group_order)
+            db.session.commit()
+
+            flash("Edited group order", 'success')
+            return redirect(url_for('moderator_page_add_group_order'))
+    else:
+        form = GroupOrderForm(users_performer)
+        if form.validate_on_submit():
+
+            user_performer = db.session.query(User).filter(User.id==form.users_performer.data).first_or_404()
+            group_order = GroupOrder(name=form.title.data, description=form.description.data,
+                                     user_performer=user_performer)
+            db.session.add(group_order)
+            db.session.commit()
+
+            flash("Added group order", 'success')
+            return redirect(url_for('moderator_page_add_group_order'))
+
+    return render_template('moderator_page_add_group_order.html', form=form)
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])
@@ -395,6 +479,16 @@ def delete_order_files(id):
 
     flash("Files was deleted", 'success')
     return redirect(url_for('edit_computer_order', id=order.id))
+
+
+@app.route('/moderator-computer-orders')
+@login_required
+@moderator_required
+def moderator_computer_orders():
+
+    orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
+
+    return render_template('moderator_computer_orders.html', orders=orders)
 
 
 @app.errorhandler(404)

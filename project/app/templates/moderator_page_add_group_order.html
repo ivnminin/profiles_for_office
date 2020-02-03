@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} Moderator Add Group order {% endblock %}
+
+{% block content %}
+
+    <form method="POST" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="grid-container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="callout success">
+                        {% for message in messages %}
+                            <p>{{ message | safe }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <br>
+            <br>
+            <h5>Необходимо заполнить поля:</h5>
+            <div class="grid-x" style="padding-top: 10px">
+                <div class="medium-8 cell">
+                    <label>Название группы: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.title(required=False) }}
+                    </label>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 250 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Описание группы:
+                        {{ form.description(required=False) }}
+                    </label>
+                   {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 500 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Выбрать исполнителя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.users_performer(required=False) }}
+                    </label>
+                   {% if form.users_performer.errors %}
+                        {% for error in form.users_performer.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="medium-8 cell">
+                    <input type="submit" id="submit" class="button" value="Создать">
+                </div>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}

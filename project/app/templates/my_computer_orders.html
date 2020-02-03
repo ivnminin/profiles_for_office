@@ -8,8 +8,15 @@
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
             <h4>Мои заявки на ПК:</h4>
-            <br>
-            <table class="unstriped">
+            <div style="margin: 20px;">
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('my_computer_orders') }}">Все</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('my_computer_orders', filter='new') }}">Новые</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('my_computer_orders', filter='in_work') }}">В работе</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('my_computer_orders', filter='closed') }}">Закрытые</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('my_computer_orders', filter='cancelled') }}">Отмененные</a></p>
+            </div>
+            {% if orders %}
+                <table class="unstriped">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
@@ -41,6 +48,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+                <p style="text-align: center">Нет заявок.</p>
+            {% endif %}
         </div>
     </div>
 

@@ -8,13 +8,19 @@
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
             <h4>Группы заявок на ПК:</h4>
-            <br>
-            <table class="unstriped">
+            <div style="margin: 20px;">
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders') }}">Все</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='in_work') }}">В работе</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='closed') }}">Закрытые</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='cancelled') }}">Отмененные</a></p>
+            </div>
+            {% if group_orders %}
+                <table class="hover">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
                         <th style="text-align: center">Тема</th>
-                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center; min-width: 600px">Описание</th>
                         <th style="text-align: center; min-width: 150px" >Дата создания</th>
                         <th style="text-align: center" >Статус</th>
                         <th style="text-align: center" >Исполнитель</th>
@@ -35,6 +41,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+                <p style="text-align: center">Нет заявок.</p>
+            {% endif %}
         </div>
     </div>
 

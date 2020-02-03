@@ -1,12 +1,14 @@
-{% extends 'base.html' %}
+{% extends 'moderator.html' %}
 <!--{% set active_page = 'index' %}-->
 
-{% block title %} Computer orders {% endblock %}
+{% block title %} Moderator Computer orders {% endblock %}
 
 {% block content %}
+    {{ super() }}
+        {% block moderator %}
 
-
-    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        {% endblock %}
+        <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
@@ -18,15 +20,8 @@
                 {% endif %}
             {% endwith %}
             <h4>Все заявки на ПК:</h4>
-            <div style="margin: 20px;">
-                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders') }}">Все</a></p>
-                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='new') }}">Новые</a></p>
-                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='in_work') }}">В работе</a></p>
-                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='closed') }}">Закрытые</a></p>
-                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='cancelled') }}">Отмененные</a></p>
-            </div>
-            {% if orders %}
-                <table class="hover">
+            <br>
+            <table class="hover">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
@@ -50,15 +45,12 @@
                             <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
                             <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
                             <td style="text-align: center">
-                                <a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть</a>
+                                <a href="{{ url_for('.computer_order', id=order.id) }}">Переместить в группу</a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            {% else %}
-                <p style="text-align: center">Нет заявок.</p>
-            {% endif %}
         </div>
     </div>
 
