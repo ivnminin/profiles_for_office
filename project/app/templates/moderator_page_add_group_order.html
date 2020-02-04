@@ -8,6 +8,7 @@
     <form method="POST" action="">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="grid-container">
+            <br>
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     <div class="callout success">
@@ -17,7 +18,6 @@
                     </div>
                 {% endif %}
             {% endwith %}
-            <br>
             <br>
             <h5>Необходимо заполнить поля:</h5>
             <div class="grid-x" style="padding-top: 10px">
@@ -54,10 +54,44 @@
                     {% endif %}
                 </div>
                 <div class="medium-8 cell">
-                    <input type="submit" id="submit" class="button" value="Создать">
+                    <input type="submit" id="submit" class="button" value="{% if form.title.data %} Редактировать {% else %} Создать {% endif %}">
                 </div>
             </div>
         </div>
     </form>
-
+    <hr>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
+            {% if group_orders %}
+                <table class="hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center; min-width: 600px">Описание</th>
+                        <th style="text-align: center; min-width: 150px" >Дата создания</th>
+                        <th style="text-align: center" >Статус</th>
+                        <th style="text-align: center" >Исполнитель</th>
+                        <th style="text-align: center" >Посмотреть</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in group_orders %}
+                        <tr>
+                            <td style="text-align: center">{{ order.id }}</td>
+                            <td>{{ order.name }}</td>
+                            <td>{{ order.description }}</td>
+                            <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center">{{ order.status | view_status }}</td>
+                            <td style="text-align: center">{{ order.user_performer.name }}</td>
+                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_group_order', id=order.id)}}">Редактировать</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p style="text-align: center">Нет заявок.</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

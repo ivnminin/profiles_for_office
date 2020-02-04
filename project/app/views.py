@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
     make_response, jsonify
 from werkzeug.utils import secure_filename
-from flask_login import login_required, login_user,current_user, logout_user
+from flask_login import login_required, login_user, current_user, logout_user
 
 from app import app, csrf
 from .models import db, Role, User, Order, GroupOrder, File, Consultation
@@ -120,7 +120,8 @@ def computer_order(id):
 
     order = db.session.query(Order).filter(Order.id == id).first_or_404()
     if current_user.is_moderator:
-        group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == app.config['STATUS_TYPE']['in_work'])\
+        group_orders = db.session.query(GroupOrder).filter((GroupOrder.status == app.config['STATUS_TYPE']['in_work'])|
+                                                           (GroupOrder.status == app.config['STATUS_TYPE']['cancelled']))\
                                                    .order_by(db.desc(GroupOrder.updated_on)).all()
 
         return render_template('computer_order.html', order=order, group_orders=group_orders)
@@ -159,7 +160,7 @@ def group_orders():
                                  .filter(GroupOrder.status==filter)\
                                  .order_by(db.desc(GroupOrder.updated_on)).all()
     else:
-        group_orders = db.session.query(GroupOrder).all()
+        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
 
 
     return render_template('group_orders.html', group_orders=group_orders)
@@ -270,6 +271,7 @@ def moderator_page_new_computer_orders():
 
     return render_template('moderator_new_computer_orders.html', orders=orders)
 
+
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
 @app.route('/moderator-page/add-group-order/<id>', methods=['GET', 'POST'])
 @login_required
@@ -277,15 +279,19 @@ def moderator_page_new_computer_orders():
 def moderator_page_add_group_order(id=None):
 
     users_performer = db.session.query(Role).filter(Role.name=='moderator').first().users
+    group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
 
     if id:
         group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
+        if request.method == 'GET':
+            form = GroupOrderForm(users_performer, group_order)
+        else:
+            form = GroupOrderForm(users_performer)
 
-        form = GroupOrderForm(group_order, users_performer)
-        if form.validate_on_submit():
+        if request.method == 'POST' and form.validate_on_submit():
             user_performer = db.session.query(User).filter(User.id==form.users_performer.data).first_or_404()
             group_order.name = form.title.data,
-            group_order.name = form.description.data
+            group_order.description = form.description.data
             group_order.user_performer = user_performer
             db.session.add(group_order)
             db.session.commit()
@@ -305,7 +311,25 @@ def moderator_page_add_group_order(id=None):
             flash("Added group order", 'success')
             return redirect(url_for('moderator_page_add_group_order'))
 
-    return render_template('moderator_page_add_group_order.html', form=form)
+    return render_template('moderator_page_add_group_order.html', form=form, group_orders=group_orders)
+
+
+
+@app.route('/moderator-page/moderator-page-fix-group-order/<order_id>/<group_order_id>/')
+@login_required
+@moderator_required
+def moderator_page_fix_group_order(order_id, group_order_id):
+
+    order = db.session.query(Order).filter(Order.id == order_id).first_or_404()
+    group_order = db.session.query(GroupOrder).filter(GroupOrder.id == group_order_id).first_or_404()
+
+    group_order.orders.append(order)
+
+    db.session.add(group_order)
+    db.session.commit()
+
+    flash("Added order to group order", 'success')
+    return redirect(url_for('moderator_page_new_computer_orders'))
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])

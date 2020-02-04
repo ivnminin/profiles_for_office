@@ -21,7 +21,8 @@
             {% endwith %}
             <h4>Все заявки на ПК:</h4>
             <br>
-            <table class="hover">
+            {% if orders %}
+                <table class="hover">
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
@@ -51,6 +52,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+                <p style="text-align: center">Нет заявок.</p>
+            {% endif %}
         </div>
     </div>
 

@@ -56,4 +56,5 @@ class GroupOrderForm(FlaskForm):
             self.title.data = group_order.name
             self.description.data = group_order.description
 
-        self.users_performer.choices = [(user.id, user.name) for user in users_performer]
+        self.users_performer.choices = [(user.id, '{} {} {}'.format(user.name, user.second_name, user.last_name))
+                                        for user in users_performer]

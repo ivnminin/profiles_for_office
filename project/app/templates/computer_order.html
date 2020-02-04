@@ -34,11 +34,21 @@
         {% if current_user.is_moderator %}
             <div class="cell small-6" style="border-left: solid 1px grey">
                 {% if not order.group_order %}
-                    <p>У заявки нет группы, необходимо выбрать или <a href="">создать новую группу</a>:</p>
-                    {% for group_order in group_orders %}
-                        <button class="hollow button" href="#">{{ group_order.name }}</button>
-                    {% endfor %}
+                    <p>У заявки нет группы, необходимо выбрать или <a href="{{ url_for('moderator_page_add_group_order') }}">создать новую группу</a>:</p>
                 {% endif %}
+                <p>Вырианты статусов:</p>
+                <div style="border-bottom: solid grey 1px; margin-bottom: 15px;">
+                    <a class="hollow button" href="#">Новая (не содержит заявок)</a>
+                    <a class="hollow button secondary" href="#">Отмененная</a>
+                    <a class="hollow button success" href="#">Закрытая</a>
+                    <a class="hollow button warning" href="#">В работе</a>
+                </div>
+
+                <!--<button class="hollow button alert" href="#">Warning</button>-->
+                {% for group_order in group_orders %}
+                    <a class="hollow {% if group_order.status == 'cancelled' %} secondary {% elif group_order.status == 'in_work' and group_order.orders %} warning {% endif %} button" href="{{ url_for('moderator_page_fix_group_order', order_id=order.id, group_order_id=group_order.id) }}">{{ group_order.name }}</a>
+                {% endfor %}
+
             </div>
         {% endif %}
     </div>
