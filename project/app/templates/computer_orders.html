@@ -1,11 +1,17 @@
-{% extends 'base.html' %}
+{% if current_user.is_moderator %}
+    {% extends 'moderator.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
 <!--{% set active_page = 'index' %}-->
 
 {% block title %} Computer orders {% endblock %}
 
 {% block content %}
+    {{ super() }}
+    {% block moderator %}
 
-
+    {% endblock %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
             {% with messages = get_flashed_messages() %}
@@ -50,7 +56,7 @@
                             <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
                             <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
                             <td style="text-align: center">
-                                <a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть</a>
+                                <a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Переместить{% endif %}</a>
                             </td>
                         </tr>
                     {% endfor %}

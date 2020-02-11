@@ -4,7 +4,6 @@
             <li><a href="{{ url_for('index') }}" style="margin: 0 5px">Главная</a></li>
             {% if current_user.is_administrator %}
                 <li><a href="{{ url_for('admin_page') }}">Администратор</a></li>
-                <li><a href="{{ url_for('moderator_page') }}">Модератор</a></li>
             {% endif %}
             {% if current_user.is_moderator %}
                 <li><a href="{{ url_for('moderator_page') }}">Модератор</a></li>

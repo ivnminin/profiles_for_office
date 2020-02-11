@@ -63,7 +63,7 @@ class User(db.Model, UserMixin):
 
     @property
     def is_moderator(self):
-        if self.role.name == 'moderator':
+        if self.role.name in ['moderator', 'admin']:
             return True
 
     @property

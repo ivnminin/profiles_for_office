@@ -261,15 +261,25 @@ def moderator_page():
     return render_template('moderator.html')
 
 
-@app.route('/moderator-page/new-computer-orders')
+@app.route('/moderator-page/computer-orders')
 @login_required
 @moderator_required
-def moderator_page_new_computer_orders():
+def moderator_page_computer_orders():
 
-    orders = db.session.query(Order).filter(Order.group_order == None) \
-                                    .order_by(db.desc(Order.updated_on)).all()
 
-    return render_template('moderator_new_computer_orders.html', orders=orders)
+    filter = request.args.get('filter')
+    if filter == 'new':
+        orders = db.session.query(Order).filter(Order.group_order == None)\
+                                        .order_by(db.desc(Order.updated_on)).all()
+    elif filter:
+        orders = db.session.query(Order)\
+                 .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
+                 .order_by(db.desc(Order.updated_on)).all()
+    else:
+        orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
+
+
+    return render_template('computer_orders.html', orders=orders)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
@@ -329,7 +339,7 @@ def moderator_page_fix_group_order(order_id, group_order_id):
     db.session.commit()
 
     flash("Added order to group order", 'success')
-    return redirect(url_for('moderator_page_new_computer_orders'))
+    return redirect(url_for('moderator_page_computer_orders'))
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])
