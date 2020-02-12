@@ -1,10 +1,16 @@
-{% extends 'base.html' %}
-<!--{% set active_page = 'index' %}-->
+{% if current_user.is_moderator %}
+    {% extends 'moderator.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}<!--{% set active_page = 'index' %}-->
 
 {% block title %} Computer order {% endblock %}
 
 {% block content %}
+    {{ super() }}
+    {% block moderator %}
 
+    {% endblock %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
 
         <div class="cell {% if current_user.is_moderator %} small-6 {% else %} small-10 large-offset-1{% endif %}">
@@ -16,6 +22,7 @@
             <div><p style="display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ order.description}}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
             <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ order.group_order.status | view_status }}</p></div>
+            <div><p style="display: inline;"><strong>Состоит в группе: </strong></p><p style="display: inline;">{% if order.group_order %} № {{ order.group_order.id }}, {{ order.group_order.name }} {% else %} Еще нет группы, необходимо выбрать {% endif %}</p></div>
             <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</p></div>
             <hr style="max-width: none;">
             <h5>Скриншоты:</h5>
@@ -35,6 +42,8 @@
             <div class="cell small-6" style="border-left: solid 1px grey">
                 {% if not order.group_order %}
                     <p>У заявки нет группы, необходимо выбрать или <a href="{{ url_for('moderator_page_add_group_order') }}">создать новую группу</a>:</p>
+                {% else %}
+                    <p>Заявка состоит в группе: <strong> {{ order.group_order.name }} </strong>, можно изменить группу (нажать на необходимую группу)</p>
                 {% endif %}
                 <p>Вырианты статусов:</p>
                 <div style="border-bottom: solid grey 1px; margin-bottom: 15px;">
@@ -43,10 +52,12 @@
                     <a class="hollow button success" href="#">Закрытая</a>
                     <a class="hollow button warning" href="#">В работе</a>
                 </div>
-
                 <!--<button class="hollow button alert" href="#">Warning</button>-->
+                <p>Существующие группы (новые/не закрытые/отмененные)</p>
                 {% for group_order in group_orders %}
-                    <a class="hollow {% if group_order.status == 'cancelled' %} secondary {% elif group_order.status == 'in_work' and group_order.orders %} warning {% endif %} button" href="{{ url_for('moderator_page_fix_group_order', order_id=order.id, group_order_id=group_order.id) }}">{{ group_order.name }}</a>
+                    {% if group_order.id != order.group_order.id %}
+                        <a class="hollow {% if group_order.status == 'cancelled' %} secondary {% elif group_order.status == 'in_work' and group_order.orders %} warning {% endif %}  button" href="{{ url_for('moderator_page_fix_group_order', order_id=order.id, group_order_id=group_order.id) }}">{{ group_order.name }}</a>
+                    {% endif %}
                 {% endfor %}
 
             </div>

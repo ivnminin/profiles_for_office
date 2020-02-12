@@ -1,10 +1,17 @@
-{% extends 'base.html' %}
+{% if current_user.is_moderator %}
+    {% extends 'moderator.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
 <!--{% set active_page = 'index' %}-->
 
 {% block title %} Group orders {% endblock %}
 
 {% block content %}
+    {{ super() }}
+    {% block moderator %}
 
+    {% endblock %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
             <h4>Группы заявок на ПК:</h4>
@@ -36,7 +43,7 @@
                             <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center; center; min-width: 100px">{% if not order.orders %} <span style="color: red"> Еще нет заявок </span> {% else %} {{ order.status | view_status }} {% endif %}</td>
                             <td style="text-align: center">{{ order.user_performer.name }}</td>
-                            <td style="text-align: center"><a href="{{ url_for('.group_order', id=order.id) }}">Посмотреть</a></td>
+                            <td style="text-align: center"><a href="{{ url_for('.group_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Редактировать{% endif %}</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -1,10 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'moderator.html' %}
 <!--{% set active_page = 'index' %}-->
 
 {% block title %} Moderator Add Group order {% endblock %}
 
 {% block content %}
+    {{ super() }}
+    {% block moderator %}
 
+    {% endblock %}
     <form method="POST" action="">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="grid-container">

@@ -324,7 +324,6 @@ def moderator_page_add_group_order(id=None):
     return render_template('moderator_page_add_group_order.html', form=form, group_orders=group_orders)
 
 
-
 @app.route('/moderator-page/moderator-page-fix-group-order/<order_id>/<group_order_id>/')
 @login_required
 @moderator_required
@@ -340,6 +339,27 @@ def moderator_page_fix_group_order(order_id, group_order_id):
 
     flash("Added order to group order", 'success')
     return redirect(url_for('moderator_page_computer_orders'))
+
+
+@app.route('/moderator-page/group-orders')
+@login_required
+@moderator_required
+def moderator_page_group_orders():
+
+
+    filter = request.args.get('filter')
+    if filter == 'new':
+        group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == None)\
+                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
+    elif filter:
+        group_orders = db.session.query(GroupOrder)\
+                                 .filter(GroupOrder.status==filter)\
+                                 .order_by(db.desc(GroupOrder.updated_on)).all()
+    else:
+        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
+
+
+    return render_template('group_orders.html', group_orders=group_orders)
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])
