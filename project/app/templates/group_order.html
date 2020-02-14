@@ -15,9 +15,9 @@
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
 
         <div class="cell {% if current_user.is_moderator %} small-6 {% else %} small-10 large-offset-1{% endif %}">
-            <h4>Группа заявок на ПК:</h4>
-            <hr style="max-width: none; padding-top: 10px;">
-            <div><p style="display: inline;"><strong>Номер заявки: </strong></p><p style="display: inline;">{{ group_order.id }}</p></div>
+            <h5>Группа заявок на ПК:</h5>
+            <hr style="max-width: none;">
+            <div><p style="display: inline;"><strong>Номер группы заявок: </strong></p><p style="display: inline;">{{ group_order.id }}</p></div>
             <div><p style="display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ group_order.name }}</p></div>
             <div><p style="display: inline;"><strong>Описание </strong></p><p style="display: inline;">{{ group_order.description }}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
@@ -26,10 +26,12 @@
         </div>
         {% if current_user.is_moderator %}
             <div class="cell small-6" style="border-left: solid 1px grey">
-                <p>Функционал группа</p>
-                <p>TO-DO:</p>
-                <p>Выбрать статус</p>
-                <p>Возможность добавления продел. работ, работа может быть успешная ли и нет</p>
+                <h5>Действия с группой:</h5>
+                <hr>
+                <p>Выбрать статус (для переключения кликнуть кнопку):</p>
+                <div class="button-group">
+                    {{ group_order.status | select_status(group_order.id) | safe}}
+                </div>
             </div>
         {% endif %}
     </div>

@@ -358,8 +358,25 @@ def moderator_page_group_orders():
     else:
         group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
 
+    flash("Added order to group order", 'success')
+    return redirect(url_for('moderator_page_computer_orders'))
 
-    return render_template('group_orders.html', group_orders=group_orders)
+
+@app.route('/moderator-page/group-order/<id>/select-status/')
+@login_required
+@moderator_required
+def moderator_page_group_order_select_status(id):
+    group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
+    status = request.args.get('status')
+
+    if status and status in app.config['STATUS_TYPE']:
+        group_order.status = status
+        db.session.add(group_order)
+        db.session.commit()
+        flash("Changed status for group order", 'success')
+        return redirect(url_for('group_order', id=id))
+
+    abort(404)
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])

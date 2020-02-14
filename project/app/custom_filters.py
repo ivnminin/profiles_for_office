@@ -1,4 +1,5 @@
 from jinja2 import environment
+from flask import url_for
 
 def generate_custom_filter(app):
 
@@ -15,6 +16,51 @@ def generate_custom_filter(app):
 
         return 'Новая'
 
+
+    def select_status(value, id):
+
+        page = 'moderator_page_group_order_select_status'
+
+        if app.config['STATUS_TYPE']['in_work'] == value:
+
+            url_closed = url_for(page, id=id,
+                                 status=app.config['STATUS_TYPE']['closed'])
+            url_cancelled = url_for(page, id=id,
+                                 status=app.config['STATUS_TYPE']['cancelled'])
+
+            return  """
+                        <a href="#" class="button">В работе</a>
+                        <a href="{}" class="success button hollow">Закрыть</a>
+                        <a href="{}" class="secondary button hollow">Отменить</a>
+                    """.format(url_closed, url_cancelled)
+
+        elif app.config['STATUS_TYPE']['closed'] == value:
+
+            url_in_work = url_for(page, id=id,
+                                  status=app.config['STATUS_TYPE']['in_work'])
+            url_cancelled = url_for(page, id=id,
+                                     status=app.config['STATUS_TYPE']['cancelled'])
+
+            return  """
+                        <a href="{}" class="warning button hollow">В работу</a>
+                        <a href="#" class="success button">Закрыта</a>
+                        <a href="{}" class="secondary button hollow">Отменить</a>
+                    """.format(url_in_work, url_cancelled)
+
+        elif app.config['STATUS_TYPE']['cancelled'] == value:
+
+            url_in_work = url_for(page, id=id,
+                                  status=app.config['STATUS_TYPE']['in_work'])
+            url_closed = url_for(page, id=id,
+                                 status=app.config['STATUS_TYPE']['closed'])
+
+            return  """
+                        <a href="{}" class="warning button hollow">В работу</a>
+                        <a href="{}" class="success button hollow">Закрыть</a>
+                        <a href="#" class="secondary button">Отменена</a>
+                    """.format(url_in_work, url_closed)
+
+
     def first_symbols(value, count_symbols=None):
         c = count_symbols or 255
 
@@ -27,4 +73,5 @@ def generate_custom_filter(app):
         return new_value
 
     environment.DEFAULT_FILTERS['view_status'] = view_status
+    environment.DEFAULT_FILTERS['select_status'] = select_status
     environment.DEFAULT_FILTERS['first_symbols'] = first_symbols
