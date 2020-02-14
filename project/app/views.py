@@ -8,8 +8,8 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user, current_user, logout_user
 
 from app import app, csrf
-from .models import db, Role, User, Order, GroupOrder, File, Consultation
-from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm
+from .models import db, Role, User, Order, GroupOrder, File, Consultation, Result
+from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm
 
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
@@ -40,7 +40,7 @@ def moderator_required(f):
     return wrap
 
 
-@app.route('/login/', methods=['post', 'get'])
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -85,11 +85,11 @@ def my_computer_orders():
     filter = request.args.get('filter')
     if filter == 'new':
         orders = db.session.query(Order).filter(Order.user == current_user, Order.group_order == None)\
-                                        .order_by(db.desc(Order.updated_on)).all()
+                                        .order_by(db.desc(Order.created_on)).all()
     elif filter:
         orders = db.session.query(Order)\
             .filter(Order.user==current_user, Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
-            .order_by(db.desc(Order.updated_on)).all()
+            .order_by(db.desc(Order.created_on)).all()
     else:
         orders = current_user.orders
 
@@ -103,18 +103,18 @@ def computer_orders():
     filter = request.args.get('filter')
     if filter == 'new':
         orders = db.session.query(Order).filter(Order.group_order == None)\
-                                        .order_by(db.desc(Order.updated_on)).all()
+                                        .order_by(db.desc(Order.created_on)).all()
     elif filter:
         orders = db.session.query(Order)\
             .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
-            .order_by(db.desc(Order.updated_on)).all()
+            .order_by(db.desc(Order.created_on)).all()
     else:
-        orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
+        orders = db.session.query(Order).order_by(db.desc(Order.created_on)).all()
 
     return render_template('computer_orders.html', orders=orders)
 
 
-@app.route('/computer-order/<id>')
+@app.route('/computer-order/<id>', methods=['GET', 'POST'])
 @login_required
 def computer_order(id):
 
@@ -122,7 +122,7 @@ def computer_order(id):
     if current_user.is_moderator:
         group_orders = db.session.query(GroupOrder).filter((GroupOrder.status == app.config['STATUS_TYPE']['in_work'])|
                                                            (GroupOrder.status == app.config['STATUS_TYPE']['cancelled']))\
-                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
+                                                   .order_by(db.desc(GroupOrder.created_on)).all()
 
         return render_template('computer_order.html', order=order, group_orders=group_orders)
 
@@ -154,23 +154,38 @@ def group_orders():
     filter = request.args.get('filter')
     if filter == 'new':
         group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == None)\
-                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
+                                                   .order_by(db.desc(GroupOrder.created_on)).all()
     elif filter:
         group_orders = db.session.query(GroupOrder)\
                                  .filter(GroupOrder.status==filter)\
-                                 .order_by(db.desc(GroupOrder.updated_on)).all()
+                                 .order_by(db.desc(GroupOrder.created_on)).all()
     else:
-        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
+        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.created_on)).all()
 
 
     return render_template('group_orders.html', group_orders=group_orders)
 
 
-@app.route('/group-order/<id>')
+@app.route('/group-order/<id>', methods=['GET', 'POST'])
 @login_required
 def group_order(id):
 
     group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
+    if current_user.is_moderator:
+
+        form = GroupOrderResultForm()
+        if form.validate_on_submit():
+
+            result = Result(name=form.title.data, positive=form.positive.data)
+            group_order.results.append(result)
+
+            db.session.add(group_order)
+            db.session.commit()
+
+            flash("Edited group order", 'success')
+            return redirect(url_for('group_order', id=id))
+
+        return render_template('group_order.html', group_order=group_order, form=form)
 
     return render_template('group_order.html', group_order=group_order)
 
@@ -265,21 +280,7 @@ def moderator_page():
 @login_required
 @moderator_required
 def moderator_page_computer_orders():
-
-
-    filter = request.args.get('filter')
-    if filter == 'new':
-        orders = db.session.query(Order).filter(Order.group_order == None)\
-                                        .order_by(db.desc(Order.updated_on)).all()
-    elif filter:
-        orders = db.session.query(Order)\
-                 .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
-                 .order_by(db.desc(Order.updated_on)).all()
-    else:
-        orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
-
-
-    return render_template('computer_orders.html', orders=orders)
+    return redirect(url_for('computer_orders'))
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
@@ -289,7 +290,7 @@ def moderator_page_computer_orders():
 def moderator_page_add_group_order(id=None):
 
     users_performer = db.session.query(Role).filter(Role.name=='moderator').first().users
-    group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
+    group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.created_on)).all()
 
     if id:
         group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
@@ -346,20 +347,7 @@ def moderator_page_fix_group_order(order_id, group_order_id):
 @moderator_required
 def moderator_page_group_orders():
 
-
-    filter = request.args.get('filter')
-    if filter == 'new':
-        group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == None)\
-                                                   .order_by(db.desc(GroupOrder.updated_on)).all()
-    elif filter:
-        group_orders = db.session.query(GroupOrder)\
-                                 .filter(GroupOrder.status==filter)\
-                                 .order_by(db.desc(GroupOrder.updated_on)).all()
-    else:
-        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.updated_on)).all()
-
-    flash("Added order to group order", 'success')
-    return redirect(url_for('moderator_page_computer_orders'))
+    return redirect(url_for('group_orders'))
 
 
 @app.route('/moderator-page/group-order/<id>/select-status/')
@@ -557,7 +545,7 @@ def delete_order_files(id):
 @moderator_required
 def moderator_computer_orders():
 
-    orders = db.session.query(Order).order_by(db.desc(Order.updated_on)).all()
+    orders = db.session.query(Order).order_by(db.desc(Order.created_on)).all()
 
     return render_template('moderator_computer_orders.html', orders=orders)
 

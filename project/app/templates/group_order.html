@@ -13,13 +13,25 @@
 
     {% endblock %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
-
+        <div class="cell">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="callout success">
+                    {% for message in messages %}
+                        <p>{{ message | safe }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell {% if current_user.is_moderator %} small-6 {% else %} small-10 large-offset-1{% endif %}">
             <h5>Группа заявок на ПК:</h5>
             <hr style="max-width: none;">
             <div><p style="display: inline;"><strong>Номер группы заявок: </strong></p><p style="display: inline;">{{ group_order.id }}</p></div>
             <div><p style="display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ group_order.name }}</p></div>
-            <div><p style="display: inline;"><strong>Описание </strong></p><p style="display: inline;">{{ group_order.description }}</p></div>
+            <div><p style="display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ group_order.description }}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
             <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ group_order.status | view_status }}</p></div>
             <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{{ group_order.user_performer.name }}</p></div>
@@ -32,8 +44,52 @@
                 <div class="button-group">
                     {{ group_order.status | select_status(group_order.id) | safe}}
                 </div>
-                <p>TO DO</p>
-                <p>Ввести результат и выбрать bool</p>
+                <hr>
+                <form method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <h5>Необходимо заполнить поле результата проделанных работ:</h5>
+                    <label>Результат: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.title(required=False) }}
+                    </label>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 250 символов.</p>
+                    <label>Выбрать положительный или отрицательный результат:
+                        {{ form.positive }}
+                    </label>
+                    <input type="submit" id="submit" class="button" value="{% if form.title.data %} Редактировать {% else %} Создать {% endif %}">
+                </form>
+                <hr>
+                <h2>TO DO</h2>
+                <h2>Возможность редактировать результат</h2>
+                <h2>Возможность изменять результат</h2>
+                <h5>Результаты данной группы:</h5>
+                {% if group_order.results %}
+                    <table class="hover">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">№</th>
+                                <th style="text-align: center; min-width: 300px">Проделанная работа</th>
+                                <th style="text-align: center">Изменить</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in group_order.results %}
+
+                                <tr {% if result.positive %} style="background-color: #3adb7670" {% else %} style="background-color:  #ffae0045" {% endif %}>
+                                    <td style="text-align: center">{{ result.id }}</td>
+                                    <td>{{ result.name }}</td>
+                                    <td style="text-align: center"><a href="">Редактировать</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p style="text-align: center; color: red">Ёще нет результатов!</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>

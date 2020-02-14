@@ -29,7 +29,7 @@ def generate_custom_filter(app):
                                  status=app.config['STATUS_TYPE']['cancelled'])
 
             return  """
-                        <a href="#" class="button">В работе</a>
+                        <a href="#" class="warning button">В работе</a>
                         <a href="{}" class="success button hollow">Закрыть</a>
                         <a href="{}" class="secondary button hollow">Отменить</a>
                     """.format(url_closed, url_cancelled)
