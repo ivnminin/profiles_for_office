@@ -167,25 +167,46 @@ def group_orders():
 
 
 @app.route('/group-order/<id>', methods=['GET', 'POST'])
+@app.route('/group-order/<id>/<result_id>', methods=['GET', 'POST'])
 @login_required
-def group_order(id):
+def group_order(id, result_id=None):
 
     group_order = db.session.query(GroupOrder).filter(GroupOrder.id == id).first_or_404()
     if current_user.is_moderator:
 
-        form = GroupOrderResultForm()
-        if form.validate_on_submit():
+        if result_id:
+            result =  db.session.query(Result).filter(Result.id == result_id).first_or_404()
 
-            result = Result(name=form.title.data, positive=form.positive.data)
-            group_order.results.append(result)
+            if request.method == 'GET':
+                form = GroupOrderResultForm(result)
+            else:
+                form = GroupOrderResultForm()
 
-            db.session.add(group_order)
-            db.session.commit()
+            if form.validate_on_submit():
+                result.name = form.title.data,
+                result.positive = form.positive.data
+                db.session.add(result)
+                db.session.commit()
 
-            flash("Edited group order", 'success')
-            return redirect(url_for('group_order', id=id))
+                flash("Edited group order and result", 'success')
+                return redirect(url_for('group_order', id=id))
 
-        return render_template('group_order.html', group_order=group_order, form=form)
+            return render_template('group_order.html', group_order=group_order, form=form)
+
+        else:
+            form = GroupOrderResultForm()
+            if form.validate_on_submit():
+
+                result = Result(name=form.title.data, positive=form.positive.data)
+                group_order.results.append(result)
+
+                db.session.add(group_order)
+                db.session.commit()
+
+                flash("Edited group order", 'success')
+                return redirect(url_for('group_order', id=id))
+
+            return render_template('group_order.html', group_order=group_order, form=form)
 
     return render_template('group_order.html', group_order=group_order)
 
@@ -358,11 +379,18 @@ def moderator_page_group_order_select_status(id):
     status = request.args.get('status')
 
     if status and status in app.config['STATUS_TYPE']:
-        group_order.status = status
-        db.session.add(group_order)
-        db.session.commit()
-        flash("Changed status for group order", 'success')
-        return redirect(url_for('group_order', id=id))
+
+        if status == app.config['STATUS_TYPE']['closed'] and not any(result.positive for result in group_order.results):
+            flash("Group order was not closed", 'alert')
+            return redirect(url_for('group_order', id=id))
+        else:
+            group_order.status = status
+            db.session.add(group_order)
+            db.session.commit()
+            flash("Changed status for group order", 'success')
+            return redirect(url_for('group_order', id=id))
+
+
 
     abort(404)
 

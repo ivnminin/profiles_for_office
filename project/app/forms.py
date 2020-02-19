@@ -62,3 +62,9 @@ class GroupOrderResultForm(FlaskForm):
     title = TextAreaField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"rows": 3, "cols": 50})
     positive = BooleanField("Positive")
     submit = SubmitField("Submit")
+
+    def __init__(self, group_order=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if group_order:
+            self.title.data = group_order.name
+            self.positive.data = group_order.positive

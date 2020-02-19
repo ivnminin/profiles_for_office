@@ -14,14 +14,14 @@
     {% endblock %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="callout success">
-                    {% for message in messages %}
-                        <p>{{ message | safe }}</p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="callout {{ category }}">
+                            <p>{{ message | safe }}</p>
+                        </div>
                     {% endfor %}
-                </div>
-            {% endif %}
+                {% endif %}
             {% endwith %}
         </div>
     </div>
@@ -77,12 +77,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for result in group_order.results %}
+                            {% for result in group_order.results[::-1] %}
 
                                 <tr {% if result.positive %} style="background-color: #3adb7670" {% else %} style="background-color:  #ffae0045" {% endif %}>
                                     <td style="text-align: center">{{ result.id }}</td>
                                     <td>{{ result.name }}</td>
-                                    <td style="text-align: center"><a href="">Редактировать</a></td>
+                                    <td style="text-align: center"><a href="{{ url_for('.group_order', id=group_order.id, result_id=result.id) }}">Редактировать</a></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
