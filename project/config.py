@@ -18,6 +18,9 @@ class BaseConfig:
 
     PERMISSION = ['admin', 'moderator', 'user']
     STATUS_TYPE = {'in_work': 'in_work', 'closed': 'closed', 'cancelled': 'cancelled'}
+    STATUS_TYPE_CSS = {'in_work': 'style="background: #FAD7A0;"',
+                       'closed': 'style="background: #ABEBC6;"',
+                       'cancelled': 'style="background: #AED6F1;"'}
 
     UPLOADED_PATH = os.path.join(app_dir, 'files_store_folder')
     UPLOADED_MAX_FILES = 7 * 1024 * 1024

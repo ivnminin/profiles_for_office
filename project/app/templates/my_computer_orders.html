@@ -30,7 +30,7 @@
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                        <tr>
+                        <tr {{ order.group_order.status | view_status_css | safe}}>
                             <td style="text-align: center">{{ order.id }}</td>
                             <td>{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
                             <td>{{ order.description }}</td>

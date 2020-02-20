@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                     {% for order in group_orders %}
-                        <tr>
+                        <tr {% if not order.orders %} {% else %} {{ order.status | view_status_css | safe }} {% endif %}>
                             <td style="text-align: center">{{ order.id }}</td>
                             <td>{{ order.name }}</td>
                             <td>{{ order.description }}</td>

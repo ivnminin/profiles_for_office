@@ -17,6 +17,20 @@ def generate_custom_filter(app):
         return 'Новая'
 
 
+    def view_status_css(value):
+
+        if app.config['STATUS_TYPE']['in_work'] == value:
+            return app.config['STATUS_TYPE_CSS']['in_work']
+
+        elif app.config['STATUS_TYPE']['closed'] == value:
+            return app.config['STATUS_TYPE_CSS']['closed']
+
+        elif app.config['STATUS_TYPE']['cancelled'] == value:
+            return app.config['STATUS_TYPE_CSS']['cancelled']
+
+        return ''
+
+
     def select_status(value, id):
 
         page = 'moderator_page_group_order_select_status'
@@ -73,5 +87,6 @@ def generate_custom_filter(app):
         return new_value
 
     environment.DEFAULT_FILTERS['view_status'] = view_status
+    environment.DEFAULT_FILTERS['view_status_css'] = view_status_css
     environment.DEFAULT_FILTERS['select_status'] = select_status
     environment.DEFAULT_FILTERS['first_symbols'] = first_symbols
