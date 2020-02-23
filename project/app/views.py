@@ -10,6 +10,7 @@ from flask_login import login_required, login_user, current_user, logout_user
 from app import app, csrf
 from .models import db, Role, User, Order, GroupOrder, File, Consultation, Result
 from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm
+from .tasker import send_email
 
 
 logging.basicConfig(filename="pydrop.log", level=logging.INFO)
@@ -534,6 +535,8 @@ def handle_form():
         flash("Edited order", 'success')
     else:
         order = Order(name=title, description=description, user=current_user)
+        send_email.apply_async(args=[title, app.config['MAIL_USERNAME'], [app.config['MAIL_ADMIN']],
+                                     description], countdown=3)
         flash("Added order", 'success')
 
     db.session.add(order)

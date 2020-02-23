@@ -7,6 +7,7 @@ from app import app, db
 from app.models import Role, User, Position, Organization, Department, Order, GroupOrder, Service, Result, File, Note, \
     Consultation
 
+
 manager = Manager(app)
 
 
