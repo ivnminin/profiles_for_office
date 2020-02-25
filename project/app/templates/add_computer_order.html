@@ -68,6 +68,13 @@
             maxFiles: 5,
             chunkSize: 5000000, // bytes
 
+            accept: function(file, done) {
+                if (file.size === 0) {
+                    done("Пустой файл не будет загружен");
+                }
+                else { done(); }
+            },
+
             init: function() {
                 // this.on("maxfilesexceeded", function(file){
                 //     if (!alert_msg) {
