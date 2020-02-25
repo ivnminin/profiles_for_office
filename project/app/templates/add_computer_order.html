@@ -69,14 +69,12 @@
             chunkSize: 5000000, // bytes
 
             init: function() {
-
                 // this.on("maxfilesexceeded", function(file){
                 //     if (!alert_msg) {
                 //         alert("Вы добавили много файлов, лишние не буду добавлены в заявку! " +
                 //               "Количество файлов не больше 5 шт., максимальный размер одного файла не больше 5 Мб.");
                 //     }
                 // });
-
                 this.on("error", function(file, message) {
                     alert(' Файл с именем ' + file.name + ' не будет добавлен, так как он не отвечает требованиям. '
                     + message);
@@ -133,7 +131,6 @@
                                 error_title.innerText = response_bad.errors.title;
                                 error_description.innerText = response_bad.errors.description;
                                 console.log(response_bad.errors);
-                                // alert('Ошибка, пропробуйте позде, 404 error');
                             }
                             else {
                                 alert(errMsg);
