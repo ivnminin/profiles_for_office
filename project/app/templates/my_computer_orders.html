@@ -32,7 +32,7 @@
                     {% for order in orders %}
                         <tr {{ order.group_order.status | view_status_css | safe}}>
                             <td style="text-align: center">{{ order.id }}</td>
-                            <td>{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
+                            <td>{{ order.user.full_name }}</td>
                             <td>{{ order.description }}</td>
                             <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center">{{ order.group_order.status | view_status }}</td>

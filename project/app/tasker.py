@@ -1,5 +1,5 @@
 from app import celery_app
-# from .models import db, Task
+from .models import db, Order
 from flask_mail import Message
 from app import mail
 
@@ -18,13 +18,19 @@ def gen_prime(x):
 
 
 @celery_app.task
-def send_email(subject, sender, recipients, text_body, html_body='<b>HTML</b> body', attachments=None):
+def send_email(id, sender, recipients):
+
+    order = db.session.query(Order).filter(Order.id == id).first()
+
+    subject = '№{}, {}'.format(order.id, order.user.full_name)
+    body = '{}\n{}\n{}\n{}'.format(subject, order.name, '-'*70, order.description)
+
     msg = Message(subject, sender=sender, recipients=recipients)
-    msg.body = text_body
+    msg.body = body
     # msg.html = html_body
-    if attachments:
-        for attachment in attachments:
-            msg.attach(*attachment)
+    # if attachments:
+    #     for attachment in attachments:
+    #         msg.attach(*attachment)
 
     mail.send(msg)
 

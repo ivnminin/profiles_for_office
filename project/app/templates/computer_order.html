@@ -17,7 +17,7 @@
             <h4>Заявка на ПК:</h4>
             <hr style="max-width: none; padding-top: 10px;">
             <div><p style="display: inline;"><strong>Номер заявки: </strong></p><p style="display: inline;">{{ order.id }}</p></div>
-            <div><p style="display: inline;"><strong>Заявитель: </strong></p><p style="display: inline;">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</p></div>
+            <div><p style="display: inline;"><strong>Заявитель: </strong></p><p style="display: inline;">{{ order.user.full_name }}</p></div>
             <div><p style="display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ order.name }}</p></div>
             <div><p style="display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ order.description}}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>

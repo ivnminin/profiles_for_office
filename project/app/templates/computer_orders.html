@@ -49,12 +49,12 @@
                     {% for order in orders %}
                         <tr {{ order.group_order.status | view_status_css | safe}}>
                             <td style="text-align: center">{{ order.id }}</td>
-                            <td style="text-align: center">{{ order.user.last_name }} {{ order.user.name }} {{ order.user.second_name }}</td>
+                            <td style="text-align: center">{{ order.user.full_name }}</td>
                             <td>{{ order.name }}</td>
                             <td>{{ order.description | first_symbols }}</td>
                             <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
-                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</td>
+                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>
                             <td style="text-align: center">
                                 <a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Переместить {% endif %}</a>
                             </td>

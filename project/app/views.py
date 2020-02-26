@@ -532,15 +532,17 @@ def handle_form():
 
         order.name = title
         order.description = description
+
         flash("Edited order", 'success')
     else:
         order = Order(name=title, description=description, user=current_user)
-        send_email.apply_async(args=[title, app.config['MAIL_USERNAME'], [app.config['MAIL_ADMIN']],
-                                     description], countdown=3)
+
         flash("Added order", 'success')
 
     db.session.add(order)
     db.session.commit()
+
+    send_email.apply_async(args=[order.id, app.config['MAIL_USERNAME'], [app.config['MAIL_ADMIN'], ]], countdown=3)
 
     return jsonify(result='success', data={'title': title, 'description': description, 'order': order.id,
                                            'url':url_for('computer_orders')}), 200

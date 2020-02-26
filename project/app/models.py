@@ -71,6 +71,10 @@ class User(db.Model, UserMixin):
         if self.role.name == 'user':
             return True
 
+    @property
+    def full_name(self):
+        return '{} {} {}'.format(self.last_name, self.name, self.second_name)
+
     def __repr__(self):
         return "<{}:{}>".format(self.id, self.username)
 
