@@ -542,7 +542,10 @@ def handle_form():
     db.session.add(order)
     db.session.commit()
 
-    send_email.apply_async(args=[order.id, app.config['MAIL_USERNAME'], [app.config['MAIL_ADMIN'], ]], countdown=3)
+    try:
+        send_email.apply_async(args=[order.id, app.config['MAIL_USERNAME'], [app.config['MAIL_ADMIN'], ]], countdown=3)
+    except Exception as e:
+        log.error('Function send_email.apply_async has some problems, error: {}'.format(e))
 
     return jsonify(result='success', data={'title': title, 'description': description, 'order': order.id,
                                            'url':url_for('computer_orders')}), 200
