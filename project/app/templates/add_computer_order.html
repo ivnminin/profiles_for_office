@@ -7,16 +7,14 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='basic.css') }}">
 
-    <script type="application/javascript" src="{{ url_for('static', filename='dropzone.js') }}"></script>
-
 {% endblock %}
 
 {% block title %} Add Computer order {% endblock %}
 
 {% block content %}
 
-    <form method="POST" action="/upload"  enctype="multipart/form-data" name="dropzone">
-         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <form method="POST" action="action"  enctype="multipart/form-data" name="dropzone" id="id_dropzone">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="grid-container">
             <br>
             <br>
@@ -52,8 +50,15 @@
 
 {% block script%}
     {{ super() }}
+    <script type="application/javascript" src="{{ url_for('static', filename='dropzone.js') }}"></script>
     <script type="application/javascript">
-        Dropzone.options.dropper = {
+
+        // Dropzone.autoDiscover = false;
+
+        // $(document).ready(function(){
+
+            // $('#id_dropzone').dropzone({
+            Dropzone.options.dropper = {
             dictDefaultMessage: "Нажмите в данное поле и выберете скриншоты.  Количество файлов не больше 5 шт., " +
                                  "максимальный размер одного файла не больше 5 Мб.",
             paramName: 'file',
@@ -168,8 +173,9 @@
                 });
             },
         };
-                                // var myDropzone = Dropzone.forElement(".dropzone");
-                                // myDropzone.processQueue();
+            // });
+
+        // });
 
     </script>
 {% endblock %}
