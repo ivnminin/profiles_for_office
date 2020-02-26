@@ -53,11 +53,6 @@
     <script type="application/javascript" src="{{ url_for('static', filename='dropzone.js') }}"></script>
     <script type="application/javascript">
 
-        // Dropzone.autoDiscover = false;
-
-        // $(document).ready(function(){
-
-            // $('#id_dropzone').dropzone({
             Dropzone.options.dropper = {
             dictDefaultMessage: "Нажмите в данное поле и выберете скриншоты.  Количество файлов не больше 5 шт., " +
                                  "максимальный размер одного файла не больше 5 Мб.",
@@ -93,10 +88,10 @@
                     this.removeFile(file);
                 });
 
-                var submitButton = document.querySelector('form[name="dropzone"]');
+                // var submitButton = document.querySelector('form[name="dropzone"]');
                 myDropzone = this;
 
-                submitButton.addEventListener("submit", function(e) {
+                $('#id_dropzone').on("submit", function(e) {
 
                     e.preventDefault();
 
@@ -173,9 +168,6 @@
                 });
             },
         };
-            // });
-
-        // });
 
     </script>
 {% endblock %}
