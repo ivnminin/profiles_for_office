@@ -34,11 +34,11 @@
                 <tbody>
                     {% for consultation in consultations %}
                         <tr>
-                            <td>{{ consultation.id }}</td>
+                            <td style="text-align: center">{{ consultation.id }}</td>
                             <td>{{ consultation.name }}</td>
                             <td>{{ consultation.description }}</td>
                             <td>{{ consultation.organization }}</td>
-                            <td>{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
