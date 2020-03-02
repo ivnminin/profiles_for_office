@@ -41,14 +41,15 @@ class User(db.Model, UserMixin):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
-    department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'))
+    department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'), nullable=False)
+    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'), nullable=False)
+    position_id = db.Column(db.Integer(), db.ForeignKey('positions.id'), nullable=False)
+
     orders = db.relationship('Order', backref='user')
     notes = db.relationship('Note', backref='user')
     consultations = db.relationship('Consultation', backref='user')
     recommendations = db.relationship('Recommendation', backref='user')
     performer = db.relationship('GroupOrder', backref='user_performer')
-    position_id = db.Column(db.Integer(), db.ForeignKey('positions.id'))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -90,6 +91,10 @@ class Position(db.Model):
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
     users = db.relationship('User', backref='position')
+
+    @classmethod
+    def choices(cls):
+        return [(choice.id, choice.name) for choice in db.session.query(cls).all()]
 
 
 class Organization(db.Model):

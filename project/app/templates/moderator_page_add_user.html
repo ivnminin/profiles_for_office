@@ -1,0 +1,182 @@
+{% extends 'moderator.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} Moderator Add user {% endblock %}
+
+{% block content %}
+    {{ super() }}
+    {% block moderator %}
+
+    {% endblock %}
+    <form method="POST" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="grid-container">
+            <br>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="callout success">
+                        {% for message in messages %}
+                            <p>{{ message | safe }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <br>
+            <h5>Необходимо заполнить поля:</h5>
+            <div class="grid-x" style="padding-top: 10px">
+                <div class="medium-8 cell">
+                    <label>Имя пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.name(required=False) }}
+                    </label>
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 100 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Отчество пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.second_name(required=False) }}
+                    </label>
+                    {% if form.second_name.errors %}
+                        {% for error in form.second_name.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 100 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Фамилия пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.last_name(required=False) }}
+                    </label>
+                    {% if form.last_name.errors %}
+                        {% for error in form.last_name.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 100 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Логин пользователя (формат: ii.ivanov.77): <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.username(required=False) }}
+                    </label>
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 50 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Телефон пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.phone(required=False) }}
+                    </label>
+                    {% if form.phone.errors %}
+                        {% for error in form.phone.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 50 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Внутр. Телефон пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.internal_phone(required=False) }}
+                    </label>
+                    {% if form.internal_phone.errors %}
+                        {% for error in form.internal_phone.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 50 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Выбрать Отдел: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.department(required=False) }}
+                    </label>
+                   {% if form.department.errors %}
+                        {% for error in form.department.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="medium-8 cell">
+                    <label>Выбрать Должность: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.position(required=False) }}
+                    </label>
+                   {% if form.position.errors %}
+                        {% for error in form.position.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="medium-8 cell">
+                    <label>Выбрать Роль: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.role(required=False) }}
+                    </label>
+                   {% if form.role.errors %}
+                        {% for error in form.department.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="medium-8 cell">
+                    <label>Пароль пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.password(required=False) }}
+                    </label>
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 100 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <label>Повтор пароля пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.password_replay(required=False) }}
+                    </label>
+                    {% if form.password_replay.errors %}
+                        {% for error in form.password_replay.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 100 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <input type="submit" id="submit" class="button" value="{% if form.name.data %} Редактировать {% else %} Создать {% endif %}">
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
+            {% if users %}
+                <table class="hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">Пользователь</th>
+                        <th style="text-align: center">Логин</th>
+                        <th style="text-align: center; min-width: 600px">Отдел</th>
+                        <th style="text-align: center; min-width: 150px" >Дата создания</th>
+                        <th style="text-align: center; min-width: 150px" >Редактировать</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td style="text-align: center">{{ user.full_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.department.name }}</td>
+                            <td style="text-align: center">{{ user.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_user', id=user.id)}}">Редактировать</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p style="text-align: center">Нет заявок.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

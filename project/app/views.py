@@ -8,8 +8,9 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user, current_user, logout_user
 
 from app import app, csrf
-from .models import db, Role, User, Order, GroupOrder, File, Consultation, Result
-from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm
+from .models import db, Role, User, Department, Position, Order, GroupOrder, File, Consultation, Result
+from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm, \
+    UserForm
 from .tasker import send_email
 
 
@@ -241,6 +242,7 @@ def resources():
 def notes():
     return render_template('my_notes.html', notes=current_user.notes)
 
+
 @app.route('/add-note')
 @login_required
 def add_note():
@@ -250,7 +252,11 @@ def add_note():
 @app.route('/consultations')
 @login_required
 def consultations():
-    return render_template('my_consultations.html', consultations=current_user.consultations)
+
+    consultations = db.session.query(Consultation).filter(Consultation.user==current_user)\
+                                                  .order_by(db.desc(Consultation.created_on)).all()
+
+    return render_template('my_consultations.html', consultations=consultations)
 
 
 @app.route('/add-consultation', methods=['GET', 'POST'])
@@ -258,16 +264,22 @@ def consultations():
 def add_consultation():
 
     form = ConsultationForm()
-    if request.method == 'POST' and form.validate_on_submit():
+    if request.method == 'POST':
+        if form.validate_on_submit():
 
-        consultation = Consultation(name=form.title.data, description=form.description.data,
-                                    organization=form.organization.data, user=current_user)
+            consultation = Consultation(name=form.title.data, description=form.description.data,
+                                        organization=form.organization.data, user=current_user)
 
-        db.session.add(consultation)
-        db.session.commit()
+            db.session.add(consultation)
+            db.session.commit()
 
-        flash("Added consultation", 'success')
-        return redirect(url_for('consultations'))
+            flash("Added consultation", 'success')
+            return redirect(url_for('consultations'))
+
+        else:
+            form.title.data = request.form.get('title')
+            form.description.data = request.form.get('description')
+            form.organization.data = request.form.get('organization')
 
     return render_template('add_consultation.html', form=form)
 
@@ -303,6 +315,80 @@ def moderator_page():
 @moderator_required
 def moderator_page_computer_orders():
     return redirect(url_for('computer_orders'))
+
+
+@app.route('/moderator-page/add-user', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-user/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_user(id=None):
+
+    users = db.session.query(User).order_by(db.desc(User.created_on)).all()
+    departments = db.session.query(Department).all()
+    positions = db.session.query(Position).all()
+    roles = db.session.query(Role).all()
+
+    if id:
+        user = db.session.query(User).filter(User.id == id).first_or_404()
+        if request.method == 'GET':
+            form = UserForm(departments, positions, roles, user)
+        else:
+            form = UserForm(departments, positions, roles)
+
+        if request.method == 'POST' and form.validate_on_submit():
+
+            department = db.session.query(Department).filter(Department.id==form.department.data).first()
+            position = db.session.query(Position).filter(Position.id==form.position.data).first()
+            role = db.session.query(Role).filter(Role.id==form.role.data).first()
+
+            user.name = form.name.data
+            user.second_name = form.second_name.data
+            user.last_name = form.last_name.data
+            user.username = form.username.data
+            user.email = form.email.data
+            user.phone = form.phone.data
+            user.internal_phone = form.internal_phone.data
+            user.description = form.description.data
+
+            user.set_password(form.password.data)
+            user.department = department
+            user.position = position
+            user.role = role
+
+            db.session.add(user)
+            db.session.commit()
+
+            flash("Edited user", 'success')
+            return redirect(url_for('moderator_page_add_user'))
+    else:
+        form = UserForm(departments, positions, roles)
+        if form.validate_on_submit():
+
+            department = db.session.query(Department).filter(Department.id==form.department.data).first()
+            position = db.session.query(Position).filter(Position.id==form.position.data).first()
+            role = db.session.query(Role).filter(Role.id==form.role.data).first()
+
+            user = User(name=form.name.data,
+                        second_name=form.second_name.data,
+                        last_name=form.last_name.data,
+                        username=form.username.data,
+                        email=form.email.data,
+                        phone=form.phone.data,
+                        internal_phone=form.internal_phone.data,
+                        description=form.description.data)
+
+            user.set_password(form.password.data)
+            user.department = department
+            user.position = position
+            user.role = role
+
+            db.session.add(user)
+            db.session.commit()
+
+            flash("Added user", 'success')
+            return redirect(url_for('moderator_page_add_user'))
+
+    return render_template('moderator_page_add_user.html', form=form, users=users)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
