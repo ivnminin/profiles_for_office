@@ -24,6 +24,12 @@ class Role(db.Model):
             db.session.add(role)
             db.session.commit()
 
+    @classmethod
+    def choices(cls):
+        r = [(role.id, role.name) for role in db.session.query(cls).all()]
+        r.append((0, ''))
+        return r
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -33,7 +39,7 @@ class User(db.Model, UserMixin):
     second_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(50), nullable=False, unique=True)
-    email = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(100))
     phone = db.Column(db.String(50))
     internal_phone = db.Column(db.String(50))
     password_hash = db.Column(db.String(100), nullable=False)
@@ -94,7 +100,9 @@ class Position(db.Model):
 
     @classmethod
     def choices(cls):
-        return [(choice.id, choice.name) for choice in db.session.query(cls).all()]
+        r = [(choice.id, choice.name) for choice in db.session.query(cls).all()]
+        r.append((0, ''))
+        return r
 
 
 class Organization(db.Model):
@@ -120,6 +128,12 @@ class Department(db.Model):
 
     organization_id = db.Column(db.Integer(), db.ForeignKey('organizations.id'))
     users = db.relationship('User', backref='department')
+
+    @classmethod
+    def choices(cls):
+        r = [(department.id, department.name) for department in db.session.query(cls).all()]
+        r.append((0, ''))
+        return r
 
 
 @login_manager.user_loader

@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, BooleanField, PasswordField, Integ
     SelectField
 from wtforms.validators import DataRequired, ValidationError, Length
 
-from .models import Position
+from .models import db, User, Department, Position, Role
 
 
 class LoginForm(FlaskForm):
@@ -14,40 +14,53 @@ class LoginForm(FlaskForm):
 
 
 class UserForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()])
-    second_name = StringField("Second_name", validators=[DataRequired()])
-    last_name = StringField("Last_name", validators=[DataRequired()])
-    username = StringField("Username", validators=[DataRequired()])
-    email = StringField("Email")
-    phone = StringField("Phone", validators=[DataRequired()])
-    internal_phone = StringField("Internal_phone", validators=[DataRequired()])
-    description = StringField("Description")
-    department = SelectField('Department', validators=[DataRequired()], coerce=int)
-    position = SelectField('Position', choices=Position.choices(), validators=[DataRequired()], coerce=int)
-    role = SelectField('Role', validators=[DataRequired()], coerce=int)
+    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    second_name = StringField("Second_name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    last_name = StringField("Last_name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    username = StringField("Username", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    email = StringField("Email", render_kw={"autocomplete": "off"})
+    phone = StringField("Phone", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    internal_phone = StringField("Internal_phone", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    description = StringField("Description", render_kw={"autocomplete": "off"})
 
-    password= PasswordField("Password", validators=[DataRequired()])
-    password_replay = PasswordField("Password_replay", validators=[DataRequired()])
+    department = SelectField('Department', choices=Department.choices(), default=0, validators=[DataRequired()], coerce=int)
+    position = SelectField('Position', choices=Position.choices(), default=0, validators=[DataRequired()], coerce=int)
+    role = SelectField('Role', choices=Role.choices(), default=0, validators=[DataRequired()], coerce=int)
+
+    password = PasswordField("Password")
+    password_replay = PasswordField("Password_replay")
 
     submit = SubmitField("Submit")
 
-    def __init__(self, departments, positions, roles, user=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if user:
-            self.name.data = user.name
-            self.second_name.data = user.second_name
-            self.last_name.data = user.last_name
-            self.username.data = user.username
-            self.phone.data = user.phone
-            self.internal_phone.data = user.internal_phone
-            self.description.data = user.description
-            self.department.default = (user.department.id, user.department.name)
-            self.position.data = user.position.id
-            self.role.default = (user.role.id, user.role.name)
+    def validate_password(self, password):
+        if not self._mode:
+            if not password.data.strip() or password.data != self.password_replay.data:
+                raise ValidationError('Passwords are not equal or password is empty')
 
-        self.department.choices = [(department.id, department.name) for department in departments]
-        # self.position.choices = [(department.id, department.name) for department in positions]
-        self.role.choices = [(role.id, role.name) for role in roles]
+    def validate_username(self, username):
+        if not self._mode:
+            if db.session.query(User).filter(User.username==username.data).first():
+                raise ValidationError('The username is already')
+        else:
+            if self._mode.name != username.data:
+                if db.session.query(User).filter(User.username == username.data).first():
+                    raise ValidationError('The username is already')
+
+    def __init__(self, mode, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._mode = mode
+        self._user = user
+        if user:
+            self.name.data = self._user.name
+            self.second_name.data = self._user.second_name
+            self.last_name.data = self._user.last_name
+            self.username.data = self._user.username
+            self.phone.data = self._user.phone
+            self.internal_phone.data = self._user.internal_phone
+            self.description.data = self._user.description
+            self.department.data = self._user.department.id
+            self.position.data = self._user.position.id
+            self.role.data = self._user.role.id
 
 
 class SearchForm(FlaskForm):

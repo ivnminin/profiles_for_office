@@ -120,30 +120,32 @@
                         {% endfor %}
                     {% endif %}
                 </div>
+                {% if not mode %}
+                    <div class="medium-8 cell">
+                        <label>Пароль пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                            {{ form.password(required=False) }}
+                        </label>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <p class="error-title" style="color: red">{{ error }}<p>
+                            {% endfor %}
+                        {% endif %}
+                        <p class="help-text">Не больше 100 символов.</p>
+                    </div>
+                    <div class="medium-8 cell">
+                        <label>Повтор пароля пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                            {{ form.password_replay(required=False) }}
+                        </label>
+                        {% if form.password_replay.errors %}
+                            {% for error in form.password_replay.errors %}
+                                <p class="error-title" style="color: red">{{ error }}<p>
+                            {% endfor %}
+                        {% endif %}
+                        <p class="help-text">Не больше 100 символов.</p>
+                    </div>
+                {% endif %}
                 <div class="medium-8 cell">
-                    <label>Пароль пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
-                        {{ form.password(required=False) }}
-                    </label>
-                    {% if form.password.errors %}
-                        {% for error in form.password.errors %}
-                            <p class="error-title" style="color: red">{{ error }}<p>
-                        {% endfor %}
-                    {% endif %}
-                    <p class="help-text">Не больше 100 символов.</p>
-                </div>
-                <div class="medium-8 cell">
-                    <label>Повтор пароля пользователя: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
-                        {{ form.password_replay(required=False) }}
-                    </label>
-                    {% if form.password_replay.errors %}
-                        {% for error in form.password_replay.errors %}
-                            <p class="error-title" style="color: red">{{ error }}<p>
-                        {% endfor %}
-                    {% endif %}
-                    <p class="help-text">Не больше 100 символов.</p>
-                </div>
-                <div class="medium-8 cell">
-                    <input type="submit" id="submit" class="button" value="{% if form.name.data %} Редактировать {% else %} Создать {% endif %}">
+                    <input type="submit" id="submit" class="button" value="{% if mode %} Редактировать {% else %} Создать {% endif %}">
                 </div>
             </div>
         </div>

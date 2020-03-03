@@ -324,16 +324,16 @@ def moderator_page_computer_orders():
 def moderator_page_add_user(id=None):
 
     users = db.session.query(User).order_by(db.desc(User.created_on)).all()
-    departments = db.session.query(Department).all()
-    positions = db.session.query(Position).all()
-    roles = db.session.query(Role).all()
-
+    mode = None
     if id:
+
         user = db.session.query(User).filter(User.id == id).first_or_404()
+        mode = user
+
         if request.method == 'GET':
-            form = UserForm(departments, positions, roles, user)
+            form = UserForm(mode, user)
         else:
-            form = UserForm(departments, positions, roles)
+            form = UserForm(mode)
 
         if request.method == 'POST' and form.validate_on_submit():
 
@@ -350,7 +350,6 @@ def moderator_page_add_user(id=None):
             user.internal_phone = form.internal_phone.data
             user.description = form.description.data
 
-            user.set_password(form.password.data)
             user.department = department
             user.position = position
             user.role = role
@@ -361,7 +360,7 @@ def moderator_page_add_user(id=None):
             flash("Edited user", 'success')
             return redirect(url_for('moderator_page_add_user'))
     else:
-        form = UserForm(departments, positions, roles)
+        form = UserForm(mode)
         if form.validate_on_submit():
 
             department = db.session.query(Department).filter(Department.id==form.department.data).first()
@@ -375,7 +374,7 @@ def moderator_page_add_user(id=None):
                         email=form.email.data,
                         phone=form.phone.data,
                         internal_phone=form.internal_phone.data,
-                        description=form.description.data)
+                        description=form.description.data,)
 
             user.set_password(form.password.data)
             user.department = department
@@ -388,7 +387,7 @@ def moderator_page_add_user(id=None):
             flash("Added user", 'success')
             return redirect(url_for('moderator_page_add_user'))
 
-    return render_template('moderator_page_add_user.html', form=form, users=users)
+    return render_template('moderator_page_add_user.html', form=form, users=users, mode=mode)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
