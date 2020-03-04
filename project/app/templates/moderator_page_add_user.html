@@ -22,6 +22,8 @@
                 {% endif %}
             {% endwith %}
             <br>
+            <h4>Создать пользователя:</h4>
+            <hr>
             <h5>Необходимо заполнить поля:</h5>
             <div class="grid-x" style="padding-top: 10px">
                 <div class="medium-8 cell">
@@ -142,6 +144,10 @@
                             {% endfor %}
                         {% endif %}
                         <p class="help-text">Не больше 100 символов.</p>
+                    </div>
+                {% else %}
+                    <div class="medium-8 cell">
+                        <p><a href="{{ url_for('moderator_page_change_password', id=form.user_id)}}">сменить пароль</a></p>
                     </div>
                 {% endif %}
                 <div class="medium-8 cell">

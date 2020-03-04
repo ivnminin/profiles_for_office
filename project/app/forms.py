@@ -23,9 +23,9 @@ class UserForm(FlaskForm):
     internal_phone = StringField("Internal_phone", validators=[DataRequired()], render_kw={"autocomplete": "off"})
     description = StringField("Description", render_kw={"autocomplete": "off"})
 
-    department = SelectField('Department', choices=Department.choices(), default=0, validators=[DataRequired()], coerce=int)
-    position = SelectField('Position', choices=Position.choices(), default=0, validators=[DataRequired()], coerce=int)
-    role = SelectField('Role', choices=Role.choices(), default=0, validators=[DataRequired()], coerce=int)
+    department = SelectField('Department', default=0, validators=[DataRequired()], coerce=int)
+    position = SelectField('Position', default=0, validators=[DataRequired()], coerce=int)
+    role = SelectField('Role', default=0, validators=[DataRequired()], coerce=int)
 
     password = PasswordField("Password")
     password_replay = PasswordField("Password_replay")
@@ -42,15 +42,16 @@ class UserForm(FlaskForm):
             if db.session.query(User).filter(User.username==username.data).first():
                 raise ValidationError('The username is already')
         else:
-            if self._mode.name != username.data:
+            if self._mode.username != username.data:
                 if db.session.query(User).filter(User.username == username.data).first():
-                    raise ValidationError('The username is already')
+                    raise ValidationError('The username is already!')
 
     def __init__(self, mode, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._mode = mode
         self._user = user
         if user:
+            self.user_id = user.id
             self.name.data = self._user.name
             self.second_name.data = self._user.second_name
             self.last_name.data = self._user.last_name
@@ -61,6 +62,41 @@ class UserForm(FlaskForm):
             self.department.data = self._user.department.id
             self.position.data = self._user.position.id
             self.role.data = self._user.role.id
+
+        self.department.choices = Department.choices()
+        self.position.choices = Position.choices()
+        self.role.choices = Role.choices()
+
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    password_replay = PasswordField("Password_replay", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+    def validate_password(self, password):
+        if password.data != self.password_replay.data:
+            raise ValidationError('Passwords are not equal')
+
+
+class DepartmentForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    submit = SubmitField("Submit")
+
+    def __init__(self, department=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if department:
+            self.name.data =department.name
+
+
+class PositionForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    chief = BooleanField("Positive")
+    submit = SubmitField("Submit")
+
+    def __init__(self, position=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if position:
+            self.name.data = position.name
+            self.chief.data = position.chief
 
 
 class SearchForm(FlaskForm):

@@ -1,0 +1,73 @@
+{% extends 'moderator.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} Moderator Add department {% endblock %}
+
+{% block content %}
+    {{ super() }}
+    {% block moderator %}
+
+    {% endblock %}
+    <form method="POST" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="grid-container">
+            <br>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="callout success">
+                        {% for message in messages %}
+                            <p>{{ message | safe }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <br>
+            <h4>Создать Отдел:</h4>
+            <hr>
+            <h5>Необходимо заполнить поля:</h5>
+            <div class="grid-x" style="padding-top: 10px">
+                <div class="medium-8 cell">
+                    <label>Имя отдела: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.name(required=False) }}
+                    </label>
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-text">Не больше 255 символов.</p>
+                </div>
+                <div class="medium-8 cell">
+                    <input type="submit" id="submit" class="button" value="{% if mode %} Редактировать {% else %} Создать {% endif %}">
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+        <div class="cell">
+            {% if departments %}
+                <table class="hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">Отдел</th>
+                        <th style="text-align: center; min-width: 150px" >Дата создания</th>
+                        <th style="text-align: center; min-width: 150px" >Редактировать</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for department in departments %}
+                        <tr>
+                            <td style="text-align: center">{{ department.name }}</td>
+                            <td style="text-align: center">{{ department.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_department', id=department.id)}}">Редактировать</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p style="text-align: center">Нет Отделов.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

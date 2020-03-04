@@ -8,9 +8,9 @@ from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user, current_user, logout_user
 
 from app import app, csrf
-from .models import db, Role, User, Department, Position, Order, GroupOrder, File, Consultation, Result
+from .models import db, Role, User, Organization, Department, Position, Order, GroupOrder, File, Consultation, Result
 from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm, \
-    UserForm
+    UserForm, ChangePasswordForm, DepartmentForm, PositionForm
 from .tasker import send_email
 
 
@@ -388,6 +388,113 @@ def moderator_page_add_user(id=None):
             return redirect(url_for('moderator_page_add_user'))
 
     return render_template('moderator_page_add_user.html', form=form, users=users, mode=mode)
+
+
+@app.route('/moderator-page/change-password/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_change_password(id):
+
+    user = db.session.query(User).filter(User.id == id).first_or_404()
+
+    form = ChangePasswordForm()
+    if request.method == 'POST' and form.validate_on_submit():
+
+        user.set_password(form.password.data)
+
+        db.session.add(user)
+        db.session.commit()
+
+        flash("The password is saved", 'success')
+        return redirect(url_for('moderator_page_add_user'))
+
+    return render_template('moderator_page_change_password.html', form=form, user=user)
+
+
+@app.route('/moderator-page/add-department', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-department/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_department(id=None):
+
+    departments = db.session.query(Department).all()
+    mode = None
+
+    if id:
+        mode = True
+        department = db.session.query(Department).filter(Department.id == id).first_or_404()
+
+        if request.method == 'GET':
+            form = DepartmentForm(department)
+        else:
+            form = DepartmentForm()
+
+        if request.method == 'POST' and form.validate_on_submit():
+
+            department.name = form.name.data
+
+            db.session.add(department)
+            db.session.commit()
+
+            flash("Edited department", 'success')
+            return redirect(url_for('moderator_page_add_department'))
+    else:
+        form = DepartmentForm()
+        if form.validate_on_submit():
+
+            organization = db.session.query(Organization).first()
+            department = Department(name=form.name.data)
+            organization.departments.append(department)
+
+            db.session.add(organization)
+            db.session.commit()
+
+            flash("Added department", 'success')
+            return redirect(url_for('moderator_page_add_department'))
+
+    return render_template('moderator_page_add_department.html', form=form, departments=departments, mode=mode)
+
+
+@app.route('/moderator-page/add-position', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-position/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_position(id=None):
+
+    positions = db.session.query(Position).all()
+    mode = None
+
+    if id:
+        mode = True
+        position = db.session.query(Position).filter(Position.id == id).first_or_404()
+
+        if request.method == 'GET':
+            form = PositionForm(position)
+        else:
+            form = PositionForm()
+
+        if request.method == 'POST' and form.validate_on_submit():
+            position.name = form.name.data
+            position.chief = form.chief.data
+
+            db.session.add(position)
+            db.session.commit()
+
+            flash("Edited position", 'success')
+            return redirect(url_for('moderator_page_add_position'))
+    else:
+        form =PositionForm()
+        if form.validate_on_submit():
+
+            position = Position(name=form.name.data, chief=form.chief.data)
+
+            db.session.add(position)
+            db.session.commit()
+
+            flash("Added position", 'success')
+            return redirect(url_for('moderator_page_add_position'))
+
+    return render_template('moderator_page_add_position.html', form=form, positions=positions, mode=mode)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
