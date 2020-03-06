@@ -33,7 +33,7 @@
         {% endblock %}
 
         {% block  script %}
-
+            <script src="{{ url_for('static', filename='update.min.js') }}"></script>
             <script src="{{ url_for('static', filename='jquery-3.4.1.min.js') }}"></script>
             <script src="{{ url_for('static', filename='foundation.min.js') }}"></script>
             <script src="{{ url_for('static', filename='motion-ui.min.js') }}"></script>
@@ -41,6 +41,24 @@
             <script>
                 $(document).foundation();
             </script>
+
+            <script>
+                var _umb = {
+                    require: {
+                        chrome: 77,
+                        safari: 10,
+                        edge: 77,
+                        firefox: 70,
+                        ie: 10,
+                        opera: 63
+                    }
+                };
+                (function(u) {
+                var s = document.createElement('script'); s.async = true; s.src = u;
+                var b = document.getElementsByTagName('script')[0]; b.parentNode.insertBefore(s, b);
+                })('/static/update.min.js');
+            </script>
+
 
         {% endblock %}
 
