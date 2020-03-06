@@ -1,6 +1,7 @@
 import os, logging, uuid
 from functools import wraps
 from datetime import datetime
+from slugify import slugify_url, slugify_filename
 
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
     make_response, jsonify
@@ -637,7 +638,9 @@ def upload():
     except FileExistsError:
         pass
 
-    tmp_path = os.path.join(sub_folder, secure_filename(original_filename))
+    original_filename_after_slug = slugify_filename(original_filename)
+
+    tmp_path = os.path.join(sub_folder, secure_filename(original_filename_after_slug))
     _, file_extension = os.path.splitext(tmp_path)
     if not file_extension:
         file_extension = '.no_file_extension'
