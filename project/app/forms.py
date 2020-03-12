@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, BooleanField, PasswordField, Integ
     SelectField
 from wtforms.validators import DataRequired, ValidationError, Length
 
-from .models import db, User, Department, Position, Role
+from .models import db, User, Department, Position, Role, ThemeConsultation
 
 
 class LoginForm(FlaskForm):
@@ -67,6 +67,7 @@ class UserForm(FlaskForm):
         self.position.choices = Position.choices()
         self.role.choices = Role.choices()
 
+
 class ChangePasswordForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     password_replay = PasswordField("Password_replay", validators=[DataRequired()])
@@ -88,7 +89,7 @@ class DepartmentForm(FlaskForm):
 
 
 class PositionForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(), Length(max=512)], render_kw={"autocomplete": "off"})
     chief = BooleanField("Positive")
     submit = SubmitField("Submit")
 
@@ -110,6 +111,7 @@ class SearchForm(FlaskForm):
         if size_from.data is None or self.size_to.data is None or size_from.data > self.size_to.data:
             raise ValidationError('Size from must be more than size to')
 
+
 class OrderComputerForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
     description = TextAreaField("Description", validators=[DataRequired(), Length(max=2048)],
@@ -122,14 +124,38 @@ class OrderComputerForm(FlaskForm):
             self.description.data = order.description
 
 
-
 class ConsultationForm(FlaskForm):
-    title = StringField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
-    description = TextAreaField("Description", validators=[DataRequired(), Length(max=2048)],
+    title = SelectField("Title", default=0, validators=[DataRequired(), Length(max=255)], coerce=int,
+                        render_kw={"autocomplete": "off"})
+    description = TextAreaField("Description", validators=[Length(max=2048)],
                                 render_kw={"rows": 4, "cols": 50})
     organization = StringField("Organization", validators=[DataRequired(), Length(max=255)],
                                render_kw={"autocomplete": "off"})
+    reg_number = StringField("Reg number", validators=[Length(max=255)], render_kw={"autocomplete": "off"})
+    person = StringField("Person", validators=[Length(max=255)], render_kw={"autocomplete": "off"})
+
     submit = SubmitField("Submit")
+
+    def __init__(self, consultation=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if consultation:
+            self.title.data = consultation.name
+            self.description.data = consultation.description
+            self.organization.data = consultation.organization
+            self.reg_number.data = consultation.reg_number
+            self.person.data = consultation.person
+
+        self.title.choices = ThemeConsultation.choices()
+
+
+class ThemeConsultationForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    submit = SubmitField("Submit")
+
+    def __init__(self, theme_consultation=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if theme_consultation:
+            self.name.data = theme_consultation.name
 
 
 class GroupOrderForm(FlaskForm):
@@ -146,6 +172,7 @@ class GroupOrderForm(FlaskForm):
 
         self.users_performer.choices = [(user.id, user.full_name) for user in users_performer]
 
+
 class GroupOrderResultForm(FlaskForm):
     title = TextAreaField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"rows": 3, "cols": 50})
     positive = BooleanField("Positive")
@@ -156,3 +183,20 @@ class GroupOrderResultForm(FlaskForm):
         if group_order:
             self.title.data = group_order.name
             self.positive.data = group_order.positive
+
+
+class VersionForm(FlaskForm):
+    version = StringField("User version", validators=[DataRequired(), Length(max=255)],
+                          render_kw={"autocomplete": "off"})
+    user_description = StringField("User description", validators=[DataRequired(), Length(max=255)],
+                                   render_kw={"autocomplete": "off"})
+    admin_description = StringField("Admin description", validators=[DataRequired(), Length(max=255)],
+                                    render_kw={"autocomplete": "off"})
+    submit = SubmitField("Submit")
+
+    def __init__(self, version=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if version:
+            self.version.data = version.version
+            self.user_description.data = version.user_description
+            self.admin_description.data = version.admin_description

@@ -54,7 +54,9 @@ class User(db.Model, UserMixin):
     orders = db.relationship('Order', backref='user')
     notes = db.relationship('Note', backref='user')
     consultations = db.relationship('Consultation', backref='user')
+    theme_consultations = db.relationship('ThemeConsultation', backref='user')
     recommendations = db.relationship('Recommendation', backref='user')
+    versions = db.relationship('Version', backref='user')
     performer = db.relationship('GroupOrder', backref='user_performer')
 
     def set_password(self, password):
@@ -160,10 +162,30 @@ class Consultation(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(2048))
     organization = db.Column(db.String(512), nullable=False)
+    reg_number = db.Column(db.String(255))
+    person = db.Column(db.String(255))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+
+
+class ThemeConsultation(db.Model):
+    __tablename__ = 'theme_consultations'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(255), nullable=False, unique=True)
+    description = db.Column(db.String(255))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+
+    @classmethod
+    def choices(cls):
+        r = [(choice.id, choice.name) for choice in db.session.query(cls).all()]
+        r.append((0, ''))
+        return r
 
 
 class Recommendation(db.Model):
@@ -254,3 +276,16 @@ class File(db.Model):
 
     def __repr__(self):
         return "<{}:{}>".format(id, self.original_name)
+
+
+class Version(db.Model):
+    __tablename__ = 'versions'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    version = db.Column(db.String(255), nullable=False)
+    user_description = db.Column(db.String(2048), nullable=False)
+    admin_description = db.Column(db.String(2048), nullable=False)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))

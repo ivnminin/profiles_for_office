@@ -4,14 +4,15 @@ from datetime import datetime
 from slugify import slugify_url, slugify_filename
 
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
-    make_response, jsonify
+    make_response, jsonify, session
 from werkzeug.utils import secure_filename
 from flask_login import login_required, login_user, current_user, logout_user
 
 from app import app, csrf
-from .models import db, Role, User, Organization, Department, Position, Order, GroupOrder, File, Consultation, Result
-from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, GroupOrderForm, GroupOrderResultForm, \
-    UserForm, ChangePasswordForm, DepartmentForm, PositionForm
+from .models import db, Role, User, Organization, Department, Position, Order, GroupOrder, File, Consultation, \
+    ThemeConsultation, Result, Version
+from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, ThemeConsultationForm, \
+    GroupOrderForm, GroupOrderResultForm, UserForm, ChangePasswordForm, DepartmentForm, PositionForm, VersionForm
 from .tasker import send_email
 
 
@@ -25,7 +26,7 @@ def admin_required(f):
         if current_user.role.name == "admin":
             return f(*args, **kwargs)
         else:
-            flash("You need to be an admin to view this page.")
+            flash("Для просмотра этой страницы вам необходимо быть администратором.")
             return redirect(url_for('index'))
 
     return wrap
@@ -37,7 +38,7 @@ def moderator_required(f):
         if current_user.role.name == "moderator" or current_user.role.name == "admin":
             return f(*args, **kwargs)
         else:
-            flash("You need to be an moderator to view this page.")
+            flash("Для просмотра этой страницы вам необходимо быть модератором.")
             return redirect(url_for('index'))
 
     return wrap
@@ -55,7 +56,7 @@ def login():
             login_user(user, remember=form.remember.data)
             return redirect(url_for('index'))
 
-        flash("Invalid username/password", 'error')
+        flash("Неверное имя пользователя или пароль", 'error')
         return redirect(url_for('login'))
 
     return render_template('login.html', form=form)
@@ -191,7 +192,7 @@ def group_order(id, result_id=None):
                 db.session.add(result)
                 db.session.commit()
 
-                flash("Edited group order and result", 'success')
+                flash("Группа заявок изменена.", 'success')
                 return redirect(url_for('group_order', id=id))
 
             return render_template('group_order.html', group_order=group_order, form=form)
@@ -206,7 +207,7 @@ def group_order(id, result_id=None):
                 db.session.add(group_order)
                 db.session.commit()
 
-                flash("Edited group order", 'success')
+                flash("Группа заявок создана.", 'success')
                 return redirect(url_for('group_order', id=id))
 
             return render_template('group_order.html', group_order=group_order, form=form)
@@ -254,35 +255,95 @@ def add_note():
 @login_required
 def consultations():
 
+    consultations = db.session.query(Consultation).order_by(db.desc(Consultation.created_on)).all()
+
+    return render_template('consultations.html', consultations=consultations)
+
+
+@app.route('/my-consultations')
+@login_required
+def my_consultations():
+
     consultations = db.session.query(Consultation).filter(Consultation.user==current_user)\
                                                   .order_by(db.desc(Consultation.created_on)).all()
 
     return render_template('my_consultations.html', consultations=consultations)
 
 
+# @app.route('/add-consultation', methods=['GET', 'POST'])
+# @login_required
+# def add_consultation():
+#
+#     form = ConsultationForm()
+#     if request.method == 'POST':
+#         if form.validate_on_submit():
+#
+#             consultation = Consultation(name=form.title.data, description=form.description.data,
+#                                         organization=form.organization.data, user=current_user)
+#
+#             db.session.add(consultation)
+#             db.session.commit()
+#
+#             flash("Консультация добавлена.", 'success')
+#             return redirect(url_for('consultations'))
+#
+#         else:
+#             form.title.data = request.form.get('title')
+#             form.description.data = request.form.get('description')
+#             form.organization.data = request.form.get('organization')
+#
+#     return render_template('add_consultation.html', form=form)
+
 @app.route('/add-consultation', methods=['GET', 'POST'])
+@app.route('/add-consultation/<id>', methods=['GET', 'POST'])
 @login_required
-def add_consultation():
+def add_consultation(id=None):
 
-    form = ConsultationForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
+    mode = None
 
-            consultation = Consultation(name=form.title.data, description=form.description.data,
-                                        organization=form.organization.data, user=current_user)
+    if id:
+        mode = True
+        consultation = db.session.query(Consultation).filter(Consultation.id == id).first_or_404()
+
+        if request.method == 'GET':
+            form = ConsultationForm(consultation)
+        else:
+            form = ConsultationForm()
+
+        if request.method == 'POST' and form.validate_on_submit():
+            theme_consultation = db.session.query(ThemeConsultation).filter(ThemeConsultation.id == form.name.data)\
+                                                                    .first_or_404()
+            consultation.name = theme_consultation.name
+            consultation.description = form.description.data
+            consultation.organization = form.organization.data
+            consultation.reg_number = form.reg_number.data
+            consultation.person = form.person.data
 
             db.session.add(consultation)
             db.session.commit()
 
-            flash("Added consultation", 'success')
+            flash("Консультация изменена.", 'success')
+            return redirect(url_for('consultations'))
+    else:
+        form = ConsultationForm()
+        if form.validate_on_submit():
+            theme_consultation = db.session.query(ThemeConsultation).filter(ThemeConsultation.id == form.name.data) \
+                                                                    .first_or_404()
+            consultation = Consultation(name=theme_consultation.name,
+                                        description=form.description.data,
+                                        organizationn=form.organization.data,
+                                        reg_number=form.reg_number.data,
+                                        person=form.person.data,
+                                        user=current_user,
+                                        )
+
+            db.session.add(consultation)
+            db.session.commit()
+
+            flash("Консультация создана.", 'success')
             return redirect(url_for('consultations'))
 
-        else:
-            form.title.data = request.form.get('title')
-            form.description.data = request.form.get('description')
-            form.organization.data = request.form.get('organization')
-
-    return render_template('add_consultation.html', form=form)
+    return render_template('add_consultation.html', form=form, mode=mode)
 
 
 @app.route('/recommendations')
@@ -358,7 +419,7 @@ def moderator_page_add_user(id=None):
             db.session.add(user)
             db.session.commit()
 
-            flash("Edited user", 'success')
+            flash("Пользователь изменён.", 'success')
             return redirect(url_for('moderator_page_add_user'))
     else:
         form = UserForm(mode)
@@ -385,7 +446,7 @@ def moderator_page_add_user(id=None):
             db.session.add(user)
             db.session.commit()
 
-            flash("Added user", 'success')
+            flash("Пользователь создан.", 'success')
             return redirect(url_for('moderator_page_add_user'))
 
     return render_template('moderator_page_add_user.html', form=form, users=users, mode=mode)
@@ -406,7 +467,7 @@ def moderator_page_change_password(id):
         db.session.add(user)
         db.session.commit()
 
-        flash("The password is saved", 'success')
+        flash("Пароль сохранён.", 'success')
         return redirect(url_for('moderator_page_add_user'))
 
     return render_template('moderator_page_change_password.html', form=form, user=user)
@@ -437,7 +498,7 @@ def moderator_page_add_department(id=None):
             db.session.add(department)
             db.session.commit()
 
-            flash("Edited department", 'success')
+            flash("Наименование группу изменено.", 'success')
             return redirect(url_for('moderator_page_add_department'))
     else:
         form = DepartmentForm()
@@ -450,7 +511,7 @@ def moderator_page_add_department(id=None):
             db.session.add(organization)
             db.session.commit()
 
-            flash("Added department", 'success')
+            flash("Наименование группу создано.", 'success')
             return redirect(url_for('moderator_page_add_department'))
 
     return render_template('moderator_page_add_department.html', form=form, departments=departments, mode=mode)
@@ -481,7 +542,7 @@ def moderator_page_add_position(id=None):
             db.session.add(position)
             db.session.commit()
 
-            flash("Edited position", 'success')
+            flash("Наименование позиции изменено.", 'success')
             return redirect(url_for('moderator_page_add_position'))
     else:
         form =PositionForm()
@@ -492,10 +553,52 @@ def moderator_page_add_position(id=None):
             db.session.add(position)
             db.session.commit()
 
-            flash("Added position", 'success')
+            flash("Наименование позиции создано.", 'success')
             return redirect(url_for('moderator_page_add_position'))
 
     return render_template('moderator_page_add_position.html', form=form, positions=positions, mode=mode)
+
+
+@app.route('/moderator-page/add-theme-consultation', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-theme-consultation/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_theme_consultation(id=None):
+
+    theme_consultations = db.session.query(ThemeConsultation).all()
+    mode = None
+
+    if id:
+        mode = True
+        theme_consultation = db.session.query(ThemeConsultation).filter(ThemeConsultation.id == id).first_or_404()
+
+        if request.method == 'GET':
+            form = ThemeConsultationForm(theme_consultation)
+        else:
+            form = ThemeConsultationForm()
+
+        if request.method == 'POST' and form.validate_on_submit():
+            theme_consultation.name = form.name.data
+
+            db.session.add(theme_consultation)
+            db.session.commit()
+
+            flash("Тема консультации изменена.", 'success')
+            return redirect(url_for('moderator_page_add_theme_consultation'))
+    else:
+        form = ThemeConsultationForm()
+        if form.validate_on_submit():
+
+            theme_consultation = ThemeConsultation(name=form.name.data)
+
+            db.session.add(theme_consultation)
+            db.session.commit()
+
+            flash("Тема консультации создана.", 'success')
+            return redirect(url_for('moderator_page_add_theme_consultation'))
+
+    return render_template('moderator_page_add_theme_consultation.html', form=form, theme_consultations=theme_consultations,
+                           mode=mode)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
@@ -522,7 +625,7 @@ def moderator_page_add_group_order(id=None):
             db.session.add(group_order)
             db.session.commit()
 
-            flash("Edited group order", 'success')
+            flash("Группа заявок изменена.", 'success')
             return redirect(url_for('moderator_page_add_group_order'))
     else:
         form = GroupOrderForm(users_performer)
@@ -534,7 +637,7 @@ def moderator_page_add_group_order(id=None):
             db.session.add(group_order)
             db.session.commit()
 
-            flash("Added group order", 'success')
+            flash("Группа заявок создана.", 'success')
             return redirect(url_for('moderator_page_add_group_order'))
 
     return render_template('moderator_page_add_group_order.html', form=form, group_orders=group_orders)
@@ -553,7 +656,7 @@ def moderator_page_fix_group_order(order_id, group_order_id):
     db.session.add(group_order)
     db.session.commit()
 
-    flash("Added order to group order", 'success')
+    flash("Заявка добавлена в группу.", 'success')
     return redirect(url_for('moderator_page_computer_orders'))
 
 
@@ -581,12 +684,49 @@ def moderator_page_group_order_select_status(id):
             group_order.status = status
             db.session.add(group_order)
             db.session.commit()
-            flash("Changed status for group order", 'success')
+            flash("Статус группы заявок изменён.", 'success')
             return redirect(url_for('group_order', id=id))
 
-
-
     abort(404)
+
+
+@app.route('/moderator-page/add-version', methods=['GET', 'POST'])
+@app.route('/moderator-page/add-version/<id>', methods=['GET', 'POST'])
+@login_required
+@moderator_required
+def moderator_page_add_version(id=None):
+    versions = db.session.query(Version).all()
+    mode = None
+
+    if id:
+        mode = True
+        version = db.session.query(Version).filter(Version.id == id).first_or_404()
+
+        if request.method == 'GET':
+            form = VersionForm(version)
+        else:
+            form = VersionForm()
+
+        if request.method == 'POST' and form.validate_on_submit():
+            version.name = form.name.data
+
+            db.session.add(version)
+            db.session.commit()
+
+            flash("Версия ПО обновлена", 'success')
+            return redirect(url_for('moderator_page_add_version'))
+    else:
+        form = VersionForm()
+        if form.validate_on_submit():
+            version = Version(name=form.name.data)
+
+            db.session.add(version)
+            db.session.commit()
+
+            flash("Версия ПО создана.", 'success')
+            return redirect(url_for('moderator_page_add_version'))
+
+    return render_template('moderator_page_add_version', form=form, versions=versions, mode=mode)
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])
@@ -728,11 +868,11 @@ def handle_form():
         order.name = title
         order.description = description
 
-        flash("Edited order", 'success')
+        flash("Заявка изменена.", 'success')
     else:
         order = Order(name=title, description=description, user=current_user)
 
-        flash("Added order", 'success')
+        flash("Заявка создана.", 'success')
 
     db.session.add(order)
     db.session.commit()
@@ -767,7 +907,7 @@ def delete_order_files(id):
         db.session.delete(file)
         db.session.commit()
 
-    flash("Files was deleted", 'success')
+    flash("Файлы были удалены.", 'success')
     return redirect(url_for('edit_computer_order', id=order.id))
 
 
@@ -789,3 +929,35 @@ def http_404_handler(error):
 @app.errorhandler(500)
 def http_500_handler(error):
     return "<p>HTTP 500 Error Encountered</p>", 500
+
+
+@app.route('/open-page', methods=['GET', 'POST'])
+@csrf.exempt
+def open_page():
+    response = ''
+
+    for key, value in request.headers.items():
+        response = response + key + ': ' + value +'<br>'
+
+    c = '<br>Your cookies: <br>'
+    for key, value in request.cookies.items():
+        c = c + key + ': ' + value +'<br>'
+
+    s = '<br>Your sessions (client session because it is Flask): <br>'
+    for key, value in session.items():
+        s = s + key + ': ' + str(value) + '<br>'
+
+    response = response + c + s
+
+    res = make_response(response)
+    res.set_cookie('foo', 'bar', max_age=60 * 60 * 24 * 365 * 2)
+    res.set_cookie('foo1', 'bar1')
+
+    # if session.get('visits'):
+    #     return str(print(session))
+    # else:
+    session['visits'] = 2
+
+    print(session)
+
+    return res
