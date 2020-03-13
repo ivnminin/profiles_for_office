@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 <!--{% set active_page = 'index' %}-->
 
-{% block title %} My notes {% endblock %}
+{% block title %} Консультации {% endblock %}
 
 {% block content %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
@@ -16,9 +16,9 @@
                     </div>
                 {% endif %}
             {% endwith %}
-
-            <div>
-            <h4>Все Консультации:</h4>
+        </div>
+        <div style="margin: 20px;">
+            <h4>Консультации:</h4>
             <br>
             {% if consultations %}
                 <table class="unstriped">
@@ -28,10 +28,13 @@
                         <th style="text-align: center">Тема</th>
                         <th style="text-align: center">Описание</th>
                         <th style="text-align: center">Организация</th>
-                        <th style="text-align: center; min-width: 200px">Дата создания</th>
+                        <th style="text-align: center; min-width: 100px">Рег. Номер</th>
+                        <th style="text-align: center; min-width: 100px">ФИО задавшего вопрос, контакты</th>
+                        <th style="text-align: center; min-width: 100px">Добавил</th>
+                        <th style="text-align: center; min-width: 100px">Дата создания</th>
                         {% if current_user.position.chief %}
-                            <th style="text-align: center;">Изменить</th>
-                            <th style="text-align: center;">Отменить</th>
+                            <th style="text-align: center; min-width: 100px">Редактировать</th>
+                            <th style="text-align: center; min-width: 100px">Отменить</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -42,10 +45,27 @@
                             <td>{{ consultation.name }}</td>
                             <td>{{ consultation.description }}</td>
                             <td>{{ consultation.organization }}</td>
+                            <td>{{ consultation.reg_number }}</td>
+                            <td>{{ consultation.person }}</td>
+                            <td>{{ consultation.user.full_name }}</td>
                             <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             {% if current_user.position.chief %}
-                                <td style="text-align: center;"><a href="#">Изменить</a></td>
-                                <td style="text-align: center;"><a href="#">Отменить</a></td>
+                                <td style="text-align: center;"><a href="#">
+                                    {% if current_user.department == consultation.user.department %}
+                                        <a href="{{ url_for('add_consultation', id=consultation.id, next_page=next_page)}}">Редактировать</a></a>
+                                    {% else %}
+                                    {%endif %}
+                                </td>
+                                <td style="text-align: center;"><a href="#">
+                                    {% if current_user.department == consultation.user.department %}
+                                        {% if consultation.status %}
+                                            <a href="{{ url_for('change_status_consultation', id=consultation.id, status='off', next_page=next_page)}}">Отменить</a>
+                                        {% else %}
+                                            <a href="{{ url_for('change_status_consultation', id=consultation.id, status='on', next_page=next_page)}}">Отменить</a>
+                                        {% endif %}
+                                    {% else %}
+                                    {%endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -54,7 +74,6 @@
             {% else %}
                 <p style="text-align: center">Нет консультаций.</p>
             {% endif %}
-        </div>
         </div>
     </div>
 

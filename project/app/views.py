@@ -260,6 +260,16 @@ def consultations():
     return render_template('consultations.html', consultations=consultations)
 
 
+@app.route('/group-consultations')
+@login_required
+def group_consultations():
+
+    consultations = db.session.query(Consultation).join(User).filter(User.department==current_user.department) \
+                                                  .order_by(db.desc(Consultation.created_on)).all()
+
+    return render_template('consultations.html', consultations=consultations, next_page='group-consultations')
+
+
 @app.route('/my-consultations')
 @login_required
 def my_consultations():
@@ -267,32 +277,8 @@ def my_consultations():
     consultations = db.session.query(Consultation).filter(Consultation.user==current_user)\
                                                   .order_by(db.desc(Consultation.created_on)).all()
 
-    return render_template('my_consultations.html', consultations=consultations)
+    return render_template('consultations.html', consultations=consultations, next_page='my-consultations')
 
-
-# @app.route('/add-consultation', methods=['GET', 'POST'])
-# @login_required
-# def add_consultation():
-#
-#     form = ConsultationForm()
-#     if request.method == 'POST':
-#         if form.validate_on_submit():
-#
-#             consultation = Consultation(name=form.title.data, description=form.description.data,
-#                                         organization=form.organization.data, user=current_user)
-#
-#             db.session.add(consultation)
-#             db.session.commit()
-#
-#             flash("Консультация добавлена.", 'success')
-#             return redirect(url_for('consultations'))
-#
-#         else:
-#             form.title.data = request.form.get('title')
-#             form.description.data = request.form.get('description')
-#             form.organization.data = request.form.get('organization')
-#
-#     return render_template('add_consultation.html', form=form)
 
 @app.route('/add-consultation', methods=['GET', 'POST'])
 @app.route('/add-consultation/<id>', methods=['GET', 'POST'])
@@ -300,10 +286,15 @@ def my_consultations():
 def add_consultation(id=None):
 
     mode = None
+    next_pages = {'group-consultations': 'group_consultations', 'my-consultations': 'my_consultations', }
+    next_page = next_pages.get(request.args.get('next_page'), 'consultations')
 
     if id:
         mode = True
         consultation = db.session.query(Consultation).filter(Consultation.id == id).first_or_404()
+
+        if not current_user.position.chief or current_user.department != consultation.user.department:
+            abort(404)
 
         if request.method == 'GET':
             form = ConsultationForm(consultation)
@@ -311,9 +302,8 @@ def add_consultation(id=None):
             form = ConsultationForm()
 
         if request.method == 'POST' and form.validate_on_submit():
-            theme_consultation = db.session.query(ThemeConsultation).filter(ThemeConsultation.id == form.name.data)\
-                                                                    .first_or_404()
-            consultation.name = theme_consultation.name
+
+            consultation.name = form.title.data
             consultation.description = form.description.data
             consultation.organization = form.organization.data
             consultation.reg_number = form.reg_number.data
@@ -323,15 +313,14 @@ def add_consultation(id=None):
             db.session.commit()
 
             flash("Консультация изменена.", 'success')
-            return redirect(url_for('consultations'))
+            return redirect(url_for(next_page))
     else:
         form = ConsultationForm()
         if form.validate_on_submit():
-            theme_consultation = db.session.query(ThemeConsultation).filter(ThemeConsultation.id == form.name.data) \
-                                                                    .first_or_404()
-            consultation = Consultation(name=theme_consultation.name,
+
+            consultation = Consultation(name=form.title.data,
                                         description=form.description.data,
-                                        organizationn=form.organization.data,
+                                        organization=form.organization.data,
                                         reg_number=form.reg_number.data,
                                         person=form.person.data,
                                         user=current_user,
@@ -341,9 +330,34 @@ def add_consultation(id=None):
             db.session.commit()
 
             flash("Консультация создана.", 'success')
-            return redirect(url_for('consultations'))
+            return redirect(url_for(next_page))
 
     return render_template('add_consultation.html', form=form, mode=mode)
+
+
+@app.route('/change-status-consultation/<id>', methods=['GET'])
+@login_required
+def change_status_consultation(id):
+
+    consultation = db.session.query(Consultation).filter(Consultation.id == id).first_or_404()
+
+    if not current_user.position.chief or current_user.department != consultation.user.department:
+        abort(404)
+
+    next_pages = {'group-consultations': 'group_consultations', 'my-consultations': 'my_consultations', }
+    next_page = next_pages.get(request.args.get('next_page'), 'consultations')
+
+    status = request.args.get('status')
+    if status == 'off':
+        consultation.status = False
+    else:
+        consultation.status = True
+
+    db.session.add(consultation)
+    db.session.commit()
+
+    flash("Статус изменён", 'success')
+    return redirect(url_for(next_page))
 
 
 @app.route('/recommendations')
@@ -597,8 +611,8 @@ def moderator_page_add_theme_consultation(id=None):
             flash("Тема консультации создана.", 'success')
             return redirect(url_for('moderator_page_add_theme_consultation'))
 
-    return render_template('moderator_page_add_theme_consultation.html', form=form, theme_consultations=theme_consultations,
-                           mode=mode)
+    return render_template('moderator_page_add_theme_consultation.html', form=form,
+                           theme_consultations=theme_consultations, mode=mode)
 
 
 @app.route('/moderator-page/add-group-order', methods=['GET', 'POST'])
@@ -708,7 +722,9 @@ def moderator_page_add_version(id=None):
             form = VersionForm()
 
         if request.method == 'POST' and form.validate_on_submit():
-            version.name = form.name.data
+            version.version = form.version.data
+            version.user_description = form.user_description.data
+            version.admin_description = form.admin_description.data
 
             db.session.add(version)
             db.session.commit()
@@ -718,7 +734,9 @@ def moderator_page_add_version(id=None):
     else:
         form = VersionForm()
         if form.validate_on_submit():
-            version = Version(name=form.name.data)
+            version = Version(version=form.version.data,
+                              user_description=form.user_description.data,
+                              admin_description=form.admin_description.data,)
 
             db.session.add(version)
             db.session.commit()
@@ -726,7 +744,7 @@ def moderator_page_add_version(id=None):
             flash("Версия ПО создана.", 'success')
             return redirect(url_for('moderator_page_add_version'))
 
-    return render_template('moderator_page_add_version', form=form, versions=versions, mode=mode)
+    return render_template('moderator_page_add_version.html', form=form, versions=versions, mode=mode)
 
 
 @app.route('/files-list/', methods=['GET', 'POST'])
@@ -919,6 +937,15 @@ def moderator_computer_orders():
     orders = db.session.query(Order).order_by(db.desc(Order.created_on)).all()
 
     return render_template('moderator_computer_orders.html', orders=orders)
+
+
+@app.route('/versions')
+@login_required
+def versions():
+
+    versions = db.session.query(Version).order_by(db.desc(Version.created_on)).all()
+
+    return render_template('versions.html', versions=versions)
 
 
 @app.errorhandler(404)

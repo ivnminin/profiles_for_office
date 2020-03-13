@@ -164,6 +164,7 @@ class Consultation(db.Model):
     organization = db.Column(db.String(512), nullable=False)
     reg_number = db.Column(db.String(255))
     person = db.Column(db.String(255))
+    status = db.Column(db.Boolean, default=True)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
 
@@ -183,8 +184,8 @@ class ThemeConsultation(db.Model):
 
     @classmethod
     def choices(cls):
-        r = [(choice.id, choice.name) for choice in db.session.query(cls).all()]
-        r.append((0, ''))
+        r = [(choice.name, choice.name) for choice in db.session.query(cls).all()]
+        r.append(('', ''))
         return r
 
 

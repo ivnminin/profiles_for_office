@@ -125,8 +125,8 @@ class OrderComputerForm(FlaskForm):
 
 
 class ConsultationForm(FlaskForm):
-    title = SelectField("Title", default=0, validators=[DataRequired(), Length(max=255)], coerce=int,
-                        render_kw={"autocomplete": "off"})
+    title = SelectField("Title", default='', validators=[DataRequired()],
+                        render_kw={"autocomplete": "off"}, coerce=str)
     description = TextAreaField("Description", validators=[Length(max=2048)],
                                 render_kw={"rows": 4, "cols": 50})
     organization = StringField("Organization", validators=[DataRequired(), Length(max=255)],
@@ -188,10 +188,10 @@ class GroupOrderResultForm(FlaskForm):
 class VersionForm(FlaskForm):
     version = StringField("User version", validators=[DataRequired(), Length(max=255)],
                           render_kw={"autocomplete": "off"})
-    user_description = StringField("User description", validators=[DataRequired(), Length(max=255)],
-                                   render_kw={"autocomplete": "off"})
-    admin_description = StringField("Admin description", validators=[DataRequired(), Length(max=255)],
-                                    render_kw={"autocomplete": "off"})
+    user_description = TextAreaField("User description", validators=[DataRequired(), Length(max=2048)],
+                                     render_kw={"autocomplete": "off", "rows": 3, "cols": 50})
+    admin_description = TextAreaField("Admin description", validators=[DataRequired(), Length(max=2048)],
+                                      render_kw={"autocomplete": "off", "rows": 3, "cols": 50})
     submit = SubmitField("Submit")
 
     def __init__(self, version=None, *args, **kwargs):

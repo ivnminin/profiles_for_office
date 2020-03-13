@@ -22,27 +22,37 @@
                 {% endif %}
             {% endwith %}
             <br>
-            <h4>Создать Должность:</h4>
+            <h4>Создать Обновление:</h4>
             <hr>
             <h5>Необходимо заполнить поля:</h5>
             <div class="grid-x" style="padding-top: 10px">
                 <div class="medium-8 cell">
-                    <label>Должность: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
-                        {{ form.name(required=False) }}
+                    <label>Версия: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                        {{ form.version(required=False) }}
                     </label>
-                    {% if form.name.errors %}
-                        {% for error in form.name.errors %}
+                    {% if form.version.errors %}
+                        {% for error in form.version.errors %}
                             <p class="error-title" style="color: red">{{ error }}<p>
                         {% endfor %}
                     {% endif %}
-                    <p class="help-text">Не больше 512 символов.</p>
+                    <p class="help-text">Не больше 250 символов.</p>
                 </div>
                 <div class="medium-8 cell">
-                    <label>Доп. возможности:
-                        {{ form.chief(required=False) }}
+                    <label>Описание:
+                        {{ form.user_description(required=False) }}
                     </label>
-                    {% if form.chief.errors %}
-                        {% for error in form.chief.errors %}
+                    {% if form.user_description.errors %}
+                        {% for error in form.user_description.errors %}
+                            <p class="error-title" style="color: red">{{ error }}<p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="medium-8 cell">
+                    <label>Описание (админская часть):
+                        {{ form.admin_description(required=False) }}
+                    </label>
+                    {% if form.admin_description.errors %}
+                        {% for error in form.admin_description.errors %}
                             <p class="error-title" style="color: red">{{ error }}<p>
                         {% endfor %}
                     {% endif %}
@@ -56,29 +66,31 @@
     <hr>
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
-            {% if positions %}
+            {% if versions %}
                 <table class="hover">
                 <thead>
                     <tr>
-                        <th style="text-align: center">Должность</th>
-                        <th style="text-align: center">Доп. возможности</th>
-                        <th style="text-align: center; min-width: 150px" >Дата создания</th>
-                        <th style="text-align: center; min-width: 150px" >Редактировать</th>
+                        <th style="text-align: center">Версия</th>
+                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center; min-width: 150px">Описание (админская часть)</th>
+                        <th style="text-align: center; min-width: 150px">Дата создания</th>
+                        <th style="text-align: center; min-width: 150px">Редактировать</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for position in positions %}
+                    {% for version in versions %}
                         <tr>
-                            <td style="text-align: center">{{ position.name }}</td>
-                            <td style="text-align: center">{% if position.chief %}ДА{% endif %}</td>
-                            <td style="text-align: center">{{ position.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_position', id=position.id)}}">Редактировать</a></td>
+                            <td style="text-align: center">{{ version.version }}</td>
+                            <td style="text-align: center">{{ version.user_description }}</td>
+                            <td style="text-align: center">{{ version.admin_description }}</td>
+                            <td style="text-align: center">{{ version.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_version', id=version.id)}}">Редактировать</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-                <p style="text-align: center">Нет Должностей.</p>
+                <p style="text-align: center">Нет обновлений.</p>
             {% endif %}
         </div>
     </div>

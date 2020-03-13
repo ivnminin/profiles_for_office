@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 <!--{% set active_page = 'index' %}-->
 
-{% block title %} My notes {% endblock %}
+{% block title %} Мои консультации {% endblock %}
 
 {% block content %}
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
@@ -16,8 +16,8 @@
                     </div>
                 {% endif %}
             {% endwith %}
-
-        <div>
+        </div>
+        <div style="margin: 20px;">
             <h4>Мои Консультации:</h4>
             <br>
             {% if consultations %}
@@ -44,7 +44,7 @@
                             <td>{{ consultation.organization }}</td>
                             <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             {% if current_user.position.chief %}
-                                <td style="text-align: center;"><a href="#">Изменить</a></td>
+                                <td style="text-align: center;"><a href="#"><a href="{{ url_for('add_consultation', id=consultation.id)}}">Редактировать</a></a></td>
                                 <td style="text-align: center;"><a href="#">Отменить</a></td>
                             {% endif %}
                         </tr>

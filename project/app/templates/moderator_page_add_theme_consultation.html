@@ -1,7 +1,7 @@
 {% extends 'moderator.html' %}
 <!--{% set active_page = 'index' %}-->
 
-{% block title %} Moderator Add department {% endblock %}
+{% block title %} Добавить, изменить тему консультации {% endblock %}
 
 {% block content %}
     {{ super() }}
@@ -22,12 +22,12 @@
                 {% endif %}
             {% endwith %}
             <br>
-            <h4>Создать Должность:</h4>
+            <h4>Создать тему консультации:</h4>
             <hr>
             <h5>Необходимо заполнить поля:</h5>
             <div class="grid-x" style="padding-top: 10px">
                 <div class="medium-8 cell">
-                    <label>Должность: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                    <label>Тема консультации: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
                         {{ form.name(required=False) }}
                     </label>
                     {% if form.name.errors %}
@@ -35,17 +35,7 @@
                             <p class="error-title" style="color: red">{{ error }}<p>
                         {% endfor %}
                     {% endif %}
-                    <p class="help-text">Не больше 512 символов.</p>
-                </div>
-                <div class="medium-8 cell">
-                    <label>Доп. возможности:
-                        {{ form.chief(required=False) }}
-                    </label>
-                    {% if form.chief.errors %}
-                        {% for error in form.chief.errors %}
-                            <p class="error-title" style="color: red">{{ error }}<p>
-                        {% endfor %}
-                    {% endif %}
+                    <p class="help-text">Не больше 250 символов.</p>
                 </div>
                 <div class="medium-8 cell">
                     <input type="submit" id="submit" class="button" value="{% if mode %} Редактировать {% else %} Создать {% endif %}">
@@ -56,29 +46,27 @@
     <hr>
     <div class="grid-x grid-padding-x" style="padding-top: 30px">
         <div class="cell">
-            {% if positions %}
+            {% if theme_consultations %}
                 <table class="hover">
                 <thead>
                     <tr>
-                        <th style="text-align: center">Должность</th>
-                        <th style="text-align: center">Доп. возможности</th>
+                        <th style="text-align: center">Тема консультации</th>
                         <th style="text-align: center; min-width: 150px" >Дата создания</th>
                         <th style="text-align: center; min-width: 150px" >Редактировать</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for position in positions %}
+                    {% for theme_consultation in theme_consultations %}
                         <tr>
-                            <td style="text-align: center">{{ position.name }}</td>
-                            <td style="text-align: center">{% if position.chief %}ДА{% endif %}</td>
-                            <td style="text-align: center">{{ position.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_position', id=position.id)}}">Редактировать</a></td>
+                            <td style="text-align: center">{{ theme_consultation.name }}</td>
+                            <td style="text-align: center">{{ theme_consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center"><a href="{{ url_for('moderator_page_add_theme_consultation', id=theme_consultation.id)}}">Редактировать</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-                <p style="text-align: center">Нет Должностей.</p>
+                <p style="text-align: center">Нет тем консультаций.</p>
             {% endif %}
         </div>
     </div>
