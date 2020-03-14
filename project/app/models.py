@@ -76,6 +76,11 @@ class User(db.Model, UserMixin):
             return True
 
     @property
+    def is_speaker_consultations(self):
+        if self.role.name in ['speaker_consultations', 'moderator', 'admin']:
+            return True
+
+    @property
     def is_user(self):
         if self.role.name == 'user':
             return True

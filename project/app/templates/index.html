@@ -4,7 +4,17 @@
 {% block title %} Index {% endblock %}
 
 {% block content %}
-
+        <br>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="callout success" style="margin: 30px;">
+                    {% for message in messages %}
+                        <p>{{ message | safe }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <br>
         <div class="grid-container">
         <div class="grid-x" style="padding-top: 30px">
             <div>

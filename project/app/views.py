@@ -12,7 +12,8 @@ from app import app, csrf
 from .models import db, Role, User, Organization, Department, Position, Order, GroupOrder, File, Consultation, \
     ThemeConsultation, Result, Version
 from .forms import LoginForm, SearchForm, OrderComputerForm, ConsultationForm, ThemeConsultationForm, \
-    GroupOrderForm, GroupOrderResultForm, UserForm, ChangePasswordForm, DepartmentForm, PositionForm, VersionForm
+    GroupOrderForm, GroupOrderResultForm, UserForm, ChangePasswordForm, DepartmentForm, PositionForm, VersionForm, \
+    AnalyticConsultationsForm
 from .tasker import send_email
 
 
@@ -39,6 +40,19 @@ def moderator_required(f):
             return f(*args, **kwargs)
         else:
             flash("Для просмотра этой страницы вам необходимо быть модератором.")
+            return redirect(url_for('index'))
+
+    return wrap
+
+
+def speaker_consultations_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if current_user.role.name == "speaker_consultations" or current_user.role.name == "moderator" \
+                or current_user.role.name == "admin":
+            return f(*args, **kwargs)
+        else:
+            flash("Для просмотра этой страницы вам необходимо быть аналитиком отчётов по консультациям.")
             return redirect(url_for('index'))
 
     return wrap
@@ -358,6 +372,22 @@ def change_status_consultation(id):
 
     flash("Статус изменён", 'success')
     return redirect(url_for(next_page))
+
+
+@app.route('/analytic-consultations', methods=['GET', 'POST'])
+@login_required
+@speaker_consultations_required
+def analytic_consultations():
+
+    consultations = None
+
+    form = AnalyticConsultationsForm()
+    if form.validate_on_submit():
+
+        flash("Отчёт создан.", 'success')
+        return redirect(url_for('analytic_consultations', form=form, consultations=consultations))
+
+    return render_template('analytic_consultations.html', form=form, consultations=consultations)
 
 
 @app.route('/recommendations')

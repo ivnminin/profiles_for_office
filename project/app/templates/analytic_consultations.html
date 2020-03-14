@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} Аналитика консультаций {% endblock %}
+
+{% block content %}
+
+    <form method="POST" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="grid-container">
+                <br>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="callout success">
+                            {% for message in messages %}
+                                <p>{{ message | safe }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                <br>
+                <h5>Необходимо выбрать даты:</h5>
+                <div class="grid-x" style="padding-top: 10px">
+                    <div class="medium-3 cell" style="margin-right: 30px;">
+                        <label>От: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                            {{ form.report_date_start(required=False) }}
+                        </label>
+                        {% if form.report_date_start.errors %}
+                            {% for error in form.report_date_start.errors %}
+                                <p class="error-title" style="color: red">{{ error }}<p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="medium-3 cell">
+                        <label>До: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                            {{ form.report_date_finish(required=False) }}
+                        </label>
+                       {% if form.report_date_finish.errors %}
+                            {% for error in form.report_date_finish.errors %}
+                                <p class="error-title" style="color: red">{{ error }}<p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="medium-3 cell">
+                    <input type="submit" id="submit" class="button" value="Создать">
+                </div>
+            </div>
+    </form>
+
+    <div style="margin: 20px;">
+            <h4>Консультации:</h4>
+            <hr>
+            {% if consultations %}
+                <p>Отчётный период: {{ report_date_start }} - {{ report_date_finish }}</p>
+                <table class="unstriped">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">№</th>
+                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center">Описание</th>
+                        <th style="text-align: center">Организация</th>
+                        <th style="text-align: center; min-width: 100px">Рег. Номер</th>
+                        <th style="text-align: center; min-width: 100px">ФИО задавшего вопрос, контакты</th>
+                        <th style="text-align: center; min-width: 100px">Добавил</th>
+                        <th style="text-align: center; min-width: 100px">Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for consultation in consultations %}
+                        <tr>
+                            <td style="text-align: center">{{ consultation.id }}</td>
+                            <td>{{ consultation.name }}</td>
+                            <td>{{ consultation.description }}</td>
+                            <td>{{ consultation.organization }}</td>
+                            <td>{{ consultation.reg_number }}</td>
+                            <td>{{ consultation.person }}</td>
+                            <td>{{ consultation.user.full_name }}</td>
+                            <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p style="text-align: center">Нет консультаций.</p>
+            {% endif %}
+        </div>
+
+
+{% endblock %}
+
+{% block script%}
+    {{ super() }}
+
+    <script>
+        $( function() {
+            $( "#report_date_start" ).datepicker({ dateFormat: 'dd-mm-yy', showAnim: 'blind'}).val();
+            $( "#anim" ).on( "change", function() {
+                $( "#report_date_start" ).datepicker( "option", "showAnim", $( this ).val() );
+            });
+        } );
+      </script>
+
+    <script>
+        $( function() {
+            $( "#report_date_finish" ).datepicker({ dateFormat: 'dd-mm-yy', showAnim: 'blind'}).val();
+            $( "#anim" ).on( "change", function() {
+                $( "#report_date_finish" ).datepicker( "option", "showAnim", $( this ).val() );
+            });
+        } );
+      </script>
+
+
+{% endblock %}

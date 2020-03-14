@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, IntegerField, TextAreaField, \
-    SelectField
+    SelectField, DateField
 from wtforms.validators import DataRequired, ValidationError, Length
 
 from .models import db, User, Department, Position, Role, ThemeConsultation
@@ -149,6 +149,25 @@ class ConsultationForm(FlaskForm):
 
 
 class ThemeConsultationForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    submit = SubmitField("Submit")
+
+    def __init__(self, theme_consultation=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if theme_consultation:
+            self.name.data = theme_consultation.name
+
+
+class AnalyticConsultationsForm(FlaskForm):
+    report_date_start = DateField("Report Start Date", validators=[DataRequired()], format="%d-%m-%Y",
+                                                       render_kw={"autocomplete": "off",})
+    report_date_finish = DateField("Report Finish Date", validators=[DataRequired()], format="%d-%m-%Y",
+                                                        render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    submit = SubmitField("Submit")
+
+
+class Form(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
     submit = SubmitField("Submit")
 

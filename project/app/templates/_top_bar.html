@@ -18,6 +18,10 @@
             <li><a href="{{ url_for('consultations') }}">Консультации</a></li>
             <li><a href="{{ url_for('group_consultations') }}">Консультации Отдела</a></li>
             <li><a href="{{ url_for('my_consultations') }}">Мои консультации</a></li>
+            {% if current_user.is_speaker_consultations %}
+                <li><a href="{{ url_for('analytic_consultations') }}">Отчет по консультациям</a></li>
+            {% endif %}
+
         </ul>
     </div>
     <div class="top-bar-right">

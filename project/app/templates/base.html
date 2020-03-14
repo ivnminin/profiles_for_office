@@ -14,9 +14,9 @@
 
             <link rel="stylesheet" href="{{ url_for('static', filename='foundation.min.css') }}">
             <link rel="stylesheet" href="{{ url_for('static', filename='motion-ui.min.css') }}">
-            <link rel="stylesheet" href="{{ url_for('static', filename='foundation-prototype.min.css') }}">
-            <link href="{{ url_for('static', filename='foundation-icons.css') }}" rel='stylesheet' type='text/css'>
-
+            <!--<link rel="stylesheet" href="{{ url_for('static', filename='foundation-prototype.min.css') }}">-->
+            <!--<link href="{{ url_for('static', filename='foundation-icons.css') }}" rel='stylesheet' type='text/css'>-->
+            <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui-1.12.1/jquery-ui.min.css') }}">
             <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
         {% endblock %}
@@ -35,12 +35,13 @@
         {% block  script %}
             <script src="{{ url_for('static', filename='update.min.js') }}"></script>
             <script src="{{ url_for('static', filename='jquery-3.4.1.min.js') }}"></script>
+            <script src="{{ url_for('static', filename='jquery-ui-1.12.1/jquery-ui.min.js') }}"></script>
             <script src="{{ url_for('static', filename='foundation.min.js') }}"></script>
             <script src="{{ url_for('static', filename='motion-ui.min.js') }}"></script>
 
-            <script>
-                $(document).foundation();
-            </script>
+            <!--<script>-->
+                <!--$(document).foundation();-->
+            <!--</script>-->
 
             <script>
                 var _umb = {

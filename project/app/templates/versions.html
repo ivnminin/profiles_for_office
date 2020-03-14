@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+<!--{% set active_page = 'index' %}-->
+
+{% block title %} My computer orders {% endblock %}
+
+{% block content %}
+    <div class="grid-container">
+        <div class="grid-x align-center" style="padding-top: 30px">
+            <div class="cell">
+                <h4>Обновления:</h4>
+                <br>
+                {% if versions %}
+
+                    {% for version in versions %}
+                        <p>Обновлени от: {{ version.created_on.strftime('%d-%m-%Y %H:%M:%S') }}, версия {{ version.version }}.</p>
+                        <hr>
+                        <p>Описание:</p>
+                        <p>{{ version.user_description }}</p>
+                        {% if current_user.is_moderator %}
+                            <p>Описание (админская часть):</p>
+                            <p>{{ version.admin_description }}</p>
+                        {% endif %}
+                        <br>
+                        <br>
+                    {% endfor %}
+
+                {% else %}
+                    <p style="text-align: center">Нет обновлений.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
