@@ -40,7 +40,7 @@
                 </thead>
                 <tbody>
                     {% for consultation in consultations %}
-                        <tr>
+                        <tr {% if not consultation.status %} style="background-color: #b1abab "{% endif %}>
                             <td style="text-align: center">{{ consultation.id }}</td>
                             <td>{{ consultation.name }}</td>
                             <td>{{ consultation.description }}</td>
@@ -56,16 +56,22 @@
                                     {% else %}
                                     {%endif %}
                                 </td>
-                                <td style="text-align: center;">
+
                                     {% if current_user.department == consultation.user.department %}
                                         {% if consultation.status %}
-                                            <a href="{{ url_for('change_status_consultation', id=consultation.id, status='off', next_page=next_page)}}">Отменить</a>
+                                            <td style="text-align: center;">
+                                                <a href="{{ url_for('change_status_consultation', id=consultation.id, status='off', next_page=next_page)}}">Отменить</a>
+                                            </td>
                                         {% else %}
-                                            <a href="{{ url_for('change_status_consultation', id=consultation.id, status='on', next_page=next_page)}}">Отменить</a>
+                                            <td style="text-align: center;">
+                                                <a href="{{ url_for('change_status_consultation', id=consultation.id, status='on', next_page=next_page)}}">Вернуть</a>
+                                            </td>
                                         {% endif %}
                                     {% else %}
+                                        <td style="text-align: center;">
+                                        </td>
                                     {%endif %}
-                                </td>
+
                             {% endif %}
                         </tr>
                     {% endfor %}

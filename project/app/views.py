@@ -383,10 +383,12 @@ def analytic_consultations():
 
     form = AnalyticConsultationsForm()
     if form.validate_on_submit():
+        consultations = db.session.query(Consultation).filter(Consultation.status)\
+                                  .filter(Consultation.created_on >= form.report_date_start.data) \
+                                   .filter(Consultation.created_on <= form.report_date_finish.data).all()
 
         flash("Отчёт создан.", 'success')
-        return redirect(url_for('analytic_consultations', form=form, consultations=consultations))
-
+        return render_template('analytic_consultations.html', form=form, consultations=consultations)
     return render_template('analytic_consultations.html', form=form, consultations=consultations)
 
 

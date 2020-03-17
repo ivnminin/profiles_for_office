@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 <!--{% set active_page = 'index' %}-->
 
-{% block title %} My computer orders {% endblock %}
+{% block title %} Обновления {% endblock %}
 
 {% block content %}
     <div class="grid-container">
@@ -12,7 +12,7 @@
                 {% if versions %}
 
                     {% for version in versions %}
-                        <p>Обновлени от: {{ version.created_on.strftime('%d-%m-%Y %H:%M:%S') }}, версия {{ version.version }}.</p>
+                        <p>Обновление от: {{ version.created_on.strftime('%d-%m-%Y %H:%M:%S') }}, версия {{ version.version }}.</p>
                         <hr>
                         <p>Описание:</p>
                         <p>{{ version.user_description }}</p>

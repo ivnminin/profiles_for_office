@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, IntegerField, TextAreaField, \
     SelectField, DateField
@@ -7,25 +9,34 @@ from .models import db, User, Department, Position, Role, ThemeConsultation
 
 
 class LoginForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    username = StringField("Username", validators=[DataRequired(message='Это поле является обязательным.')])
+    password = PasswordField("Password", validators=[DataRequired(message='Это поле является обязательным.')])
     remember = BooleanField("Remember Me")
     submit = SubmitField("Submit")
 
 
 class UserForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
-    second_name = StringField("Second_name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
-    last_name = StringField("Last_name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
-    username = StringField("Username", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(message='Это поле является обязательным.')],
+                       render_kw={"autocomplete": "off"})
+    second_name = StringField("Second_name", validators=[DataRequired(message='Это поле является обязательным.')],
+                              render_kw={"autocomplete": "off"})
+    last_name = StringField("Last_name", validators=[DataRequired(message='Это поле является обязательным.')],
+                            render_kw={"autocomplete": "off"})
+    username = StringField("Username", validators=[DataRequired(message='Это поле является обязательным.')],
+                           render_kw={"autocomplete": "off"})
     email = StringField("Email", render_kw={"autocomplete": "off"})
-    phone = StringField("Phone", validators=[DataRequired()], render_kw={"autocomplete": "off"})
-    internal_phone = StringField("Internal_phone", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    phone = StringField("Phone", validators=[DataRequired(message='Это поле является обязательным.')],
+                        render_kw={"autocomplete": "off"})
+    internal_phone = StringField("Internal_phone", validators=[DataRequired(message='Это поле является обязательным.')],
+                                 render_kw={"autocomplete": "off"})
     description = StringField("Description", render_kw={"autocomplete": "off"})
 
-    department = SelectField('Department', default=0, validators=[DataRequired()], coerce=int)
-    position = SelectField('Position', default=0, validators=[DataRequired()], coerce=int)
-    role = SelectField('Role', default=0, validators=[DataRequired()], coerce=int)
+    department = SelectField('Department', default=0,
+                             validators=[DataRequired(message='Это поле является обязательным.')], coerce=int)
+    position = SelectField('Position', default=0,
+                           validators=[DataRequired(message='Это поле является обязательным.')], coerce=int)
+    role = SelectField('Role', default=0, validators=[DataRequired(message='Это поле является обязательным.')],
+                       coerce=int)
 
     password = PasswordField("Password")
     password_replay = PasswordField("Password_replay")
@@ -35,16 +46,16 @@ class UserForm(FlaskForm):
     def validate_password(self, password):
         if not self._mode:
             if not password.data.strip() or password.data != self.password_replay.data:
-                raise ValidationError('Passwords are not equal or password is empty')
+                raise ValidationError('Пароли не равны или пароль пуст.')
 
     def validate_username(self, username):
         if not self._mode:
             if db.session.query(User).filter(User.username==username.data).first():
-                raise ValidationError('The username is already')
+                raise ValidationError('Имя пользователя уже есть.')
         else:
             if self._mode.username != username.data:
                 if db.session.query(User).filter(User.username == username.data).first():
-                    raise ValidationError('The username is already!')
+                    raise ValidationError('Имя пользователя уже есть')
 
     def __init__(self, mode, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -69,8 +80,9 @@ class UserForm(FlaskForm):
 
 
 class ChangePasswordForm(FlaskForm):
-    password = PasswordField("Password", validators=[DataRequired()])
-    password_replay = PasswordField("Password_replay", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired(message='Это поле является обязательным.')])
+    password_replay = PasswordField("Password_replay",
+                                    validators=[DataRequired(message='Это поле является обязательным.')])
     submit = SubmitField("Submit")
 
     def validate_password(self, password):
@@ -79,7 +91,8 @@ class ChangePasswordForm(FlaskForm):
 
 
 class DepartmentForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired()], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(message='Это поле является обязательным.')],
+                       render_kw={"autocomplete": "off"})
     submit = SubmitField("Submit")
 
     def __init__(self, department=None, *args, **kwargs):
@@ -89,7 +102,9 @@ class DepartmentForm(FlaskForm):
 
 
 class PositionForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired(), Length(max=512)], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(message='Это поле является обязательным.'),
+                                           Length(max=512, message='Длина поля не может превышать 512 символов.')],
+                                           render_kw={"autocomplete": "off"})
     chief = BooleanField("Positive")
     submit = SubmitField("Submit")
 
@@ -113,8 +128,11 @@ class SearchForm(FlaskForm):
 
 
 class OrderComputerForm(FlaskForm):
-    title = StringField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
-    description = TextAreaField("Description", validators=[DataRequired(), Length(max=2048)],
+    title = StringField("Title", validators=[DataRequired(message='Это поле является обязательным.'),
+                                             Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                        render_kw={"autocomplete": "off"})
+    description = TextAreaField("Description", validators=[DataRequired(message='Это поле является обязательным.'),
+                                Length(max=2048, message='Длина поля не может превышать 2048 символов.')],
                                 render_kw={"rows": 3, "cols": 50})
 
     def __init__(self, order=None, *args, **kwargs):
@@ -125,14 +143,21 @@ class OrderComputerForm(FlaskForm):
 
 
 class ConsultationForm(FlaskForm):
-    title = SelectField("Title", default='', validators=[DataRequired()],
+    title = SelectField("Title", default='', validators=[DataRequired(message='Это поле является обязательным.'),
+                        Length(max=255, message='Длина поля не может превышать 250 символов.')],
                         render_kw={"autocomplete": "off"}, coerce=str)
-    description = TextAreaField("Description", validators=[Length(max=2048)],
+    description = TextAreaField("Description",
+                                validators=[Length(max=2048, message='Длина поля не может превышать 2048 символов.')],
                                 render_kw={"rows": 4, "cols": 50})
-    organization = StringField("Organization", validators=[DataRequired(), Length(max=255)],
+    organization = StringField("Organization",
+                               validators=[DataRequired(message='Это поле является обязательным.'),
+                               Length(max=255, message='Длина поля не может превышать 250 символов.')],
                                render_kw={"autocomplete": "off"})
-    reg_number = StringField("Reg number", validators=[Length(max=255)], render_kw={"autocomplete": "off"})
-    person = StringField("Person", validators=[Length(max=255)], render_kw={"autocomplete": "off"})
+    reg_number = StringField("Reg number",
+                             validators=[Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                             render_kw={"autocomplete": "off"})
+    person = StringField("Person", validators=[Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                         render_kw={"autocomplete": "off"})
 
     submit = SubmitField("Submit")
 
@@ -149,7 +174,9 @@ class ConsultationForm(FlaskForm):
 
 
 class ThemeConsultationForm(FlaskForm):
-    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(message='Это поле является обязательным.'),
+                                           Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                                           render_kw={"autocomplete": "off"})
     submit = SubmitField("Submit")
 
     def __init__(self, theme_consultation=None, *args, **kwargs):
@@ -159,16 +186,27 @@ class ThemeConsultationForm(FlaskForm):
 
 
 class AnalyticConsultationsForm(FlaskForm):
-    report_date_start = DateField("Report Start Date", validators=[DataRequired()], format="%d-%m-%Y",
-                                                       render_kw={"autocomplete": "off",})
-    report_date_finish = DateField("Report Finish Date", validators=[DataRequired()], format="%d-%m-%Y",
-                                                        render_kw={"autocomplete": "off"})
-    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    report_date_start = DateField("Report Start Date",
+                                  validators=[DataRequired(message='Это поле является обязательным.')],
+                                  format="%d-%m-%Y", render_kw={"autocomplete": "off",})
+    report_date_finish = DateField("Report Finish Date",
+                                   validators=[DataRequired(message='Это поле является обязательным.')],
+                                   format="%d-%m-%Y", render_kw={"autocomplete": "off"})
     submit = SubmitField("Submit")
+
+    def validate_report_date_finish(self, report_date_finish):
+
+        if  report_date_finish.data and self.report_date_start.data \
+                and report_date_finish.data < self.report_date_start.data:
+            raise ValidationError('Дата окончания отчета должна быть позже, чем дата начало отчёта!')
+
+
 
 
 class Form(FlaskForm):
-    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
+    name = StringField("Name", validators=[DataRequired(message='Это поле является обязательным.'),
+                                           Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                                           render_kw={"autocomplete": "off"})
     submit = SubmitField("Submit")
 
     def __init__(self, theme_consultation=None, *args, **kwargs):
@@ -178,9 +216,13 @@ class Form(FlaskForm):
 
 
 class GroupOrderForm(FlaskForm):
-    title = StringField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"autocomplete": "off"})
-    description = TextAreaField("Description", validators=[Length(max=512)], render_kw={"rows": 3, "cols": 50})
-    users_performer = SelectField('Users', validators=[DataRequired()], coerce=int)
+    title = StringField("Title", validators=[DataRequired(message='Это поле является обязательным.'),
+                                             Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                        render_kw={"autocomplete": "off"})
+    description = TextAreaField("Description", validators=[Length(max=512,
+                          message='Длина поля не может превышать 512 символов.')], render_kw={"rows": 3, "cols": 50})
+    users_performer = SelectField('Users', validators=[DataRequired(message='Это поле является обязательным.')],
+                                  coerce=int)
     submit = SubmitField("Submit")
 
     def __init__(self, users_performer, group_order=None, *args, **kwargs):
@@ -193,7 +235,9 @@ class GroupOrderForm(FlaskForm):
 
 
 class GroupOrderResultForm(FlaskForm):
-    title = TextAreaField("Title", validators=[DataRequired(), Length(max=255)], render_kw={"rows": 3, "cols": 50})
+    title = TextAreaField("Title", validators=[DataRequired(message='Это поле является обязательным.'),
+                                               Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                                               render_kw={"rows": 3, "cols": 50})
     positive = BooleanField("Positive")
     submit = SubmitField("Submit")
 
@@ -205,11 +249,16 @@ class GroupOrderResultForm(FlaskForm):
 
 
 class VersionForm(FlaskForm):
-    version = StringField("User version", validators=[DataRequired(), Length(max=255)],
-                          render_kw={"autocomplete": "off"})
-    user_description = TextAreaField("User description", validators=[DataRequired(), Length(max=2048)],
+    version = StringField("User version", validators=[DataRequired(message='Это поле является обязательным.'),
+                                            Length(max=255, message='Длина поля не может превышать 250 символов.')],
+                                          render_kw={"autocomplete": "off"})
+    user_description = TextAreaField("User description",
+                                     validators=[DataRequired(message='Это поле является обязательным.'),
+                                        Length(max=2048, message='Длина поля не может превышать 2048 символов.')],
                                      render_kw={"autocomplete": "off", "rows": 3, "cols": 50})
-    admin_description = TextAreaField("Admin description", validators=[DataRequired(), Length(max=2048)],
+    admin_description = TextAreaField("Admin description",
+                                      validators=[DataRequired(message='Это поле является обязательным.'),
+                                          Length(max=2048, message='Длина поля не может превышать 2048 символов.')],
                                       render_kw={"autocomplete": "off", "rows": 3, "cols": 50})
     submit = SubmitField("Submit")
 
