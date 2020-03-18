@@ -101,7 +101,7 @@
                     <tr>
                         <th style="text-align: center">№</th>
                         <th style="text-align: center">Заявитель</th>
-                        <th style="text-align: center">Тема</th>
+                        <th style="text-align: center; min-width: 250px;">Тема</th>
                         <th style="text-align: center; min-width: 500px">Описание</th>
                         <th style="text-align: center; min-width: 150px">Дата создания</th>
                         <th style="text-align: center">Статус</th>
@@ -114,8 +114,8 @@
                         <tr>
                             <td style="text-align: center">{{ order.id }}</td>
                             <td style="text-align: center">{{ order.user.full_name }}</td>
-                            <td>{{ order.name }}</td>
-                            <td>{{ order.description | first_symbols }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.description | first_symbols }}</td>
                             <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center">{{ order.group_order.status | view_status}}</td>
                             <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>

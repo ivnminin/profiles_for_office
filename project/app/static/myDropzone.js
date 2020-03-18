@@ -43,10 +43,14 @@ Dropzone.options.dropper = {
 
             var title = document.querySelector('input[name="title"]');
             var description = document.querySelector('textarea[name="description"]');
+            var order = document.querySelector('input[name="order"]');
 
             this.formData = new FormData();
             this.formData.append("title", title.value);
             this.formData.append("description", description.value);
+            if (order) {
+                this.formData.append("order_id", order.value);
+            }
             this._csrftoken = document.querySelector('input[name="csrf_token"]').value;
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/form");

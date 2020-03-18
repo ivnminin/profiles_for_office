@@ -109,7 +109,7 @@ def my_computer_orders():
             .filter(Order.user==current_user, Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
             .order_by(db.desc(Order.created_on)).all()
     else:
-        orders = current_user.orders
+        orders = db.session.query(Order).filter(Order.user==current_user).order_by(db.desc(Order.created_on)).all()
 
     return render_template('my_computer_orders.html', orders=orders)
 
@@ -907,7 +907,7 @@ def handle_form():
 
     title = request.form.get('title')
     description = request.form.get('description')
-    order_id = request.form.get('order')
+    order_id = request.form.get('order_id')
 
     if order_id:
         order = db.session.query(Order).filter(Order.id == int(order_id)).first_or_404()
