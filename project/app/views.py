@@ -1,6 +1,6 @@
 import os, logging, uuid
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from slugify import slugify_url, slugify_filename
 
 from flask import render_template, request, redirect, url_for, flash, abort, send_file, after_this_request,\
@@ -385,7 +385,8 @@ def analytic_consultations():
     if form.validate_on_submit():
         consultations = db.session.query(Consultation).filter(Consultation.status)\
                                   .filter(Consultation.created_on >= form.report_date_start.data) \
-                                   .filter(Consultation.created_on <= form.report_date_finish.data).all()
+                                  .filter(Consultation.created_on <= form.report_date_finish.data + timedelta(days=1)) \
+                                  .order_by(db.desc(Consultation.created_on)).all()
 
         flash("Отчёт создан.", 'success')
         return render_template('analytic_consultations.html', form=form, consultations=consultations)
@@ -882,11 +883,12 @@ def upload():
 
             order.files.append(file)
 
+            if len(order.files) >= app.config['DROPZONE_MAX_FILES']:
+                return make_response(('Not valid, MAX_FILES {}'.format(len(order.files)), 500))
+
             db.session.add(order)
             db.session.commit()
 
-            if len(order.files) > app.config['DROPZONE_MAX_FILES']:
-                return make_response(('Not valid, {}'.format(len(order.files)), 500))
 
     else:
         log.debug('Chunk {} of {} for file {} complete {}'

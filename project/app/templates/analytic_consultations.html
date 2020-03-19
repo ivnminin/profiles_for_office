@@ -52,7 +52,7 @@
             <h4>Консультации:</h4>
             <hr>
             {% if consultations %}
-                <p>Отчётный период: {{ report_date_start }} - {{ report_date_finish }}</p>
+                <p>Отчётный период: {{ form.report_date_start.data }} - {{ form.report_date_finish.data }}</p>
                 <table class="unstriped">
                 <thead>
                     <tr>
@@ -71,8 +71,8 @@
                         <tr>
                             <td style="text-align: center">{{ consultation.id }}</td>
                             <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all">{{ consultation.description }}</td>
-                            <td>{{ consultation.organization }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.description }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.organization }}</td>
                             <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.reg_number }}</td>
                             <td>{{ consultation.person }}</td>
                             <td>{{ consultation.user.full_name }}</td>
@@ -94,7 +94,11 @@
 
     <script>
         $( function() {
-            $( "#report_date_start" ).datepicker({ dateFormat: 'dd-mm-yy', showAnim: 'blind'}).val();
+            $( "#report_date_start" ).datepicker({
+                dateFormat: 'dd-mm-yy',
+                monthNames : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+	            dayNamesMin : ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+                showAnim: 'blind'}).val();
             $( "#anim" ).on( "change", function() {
                 $( "#report_date_start" ).datepicker( "option", "showAnim", $( this ).val() );
             });
@@ -103,7 +107,11 @@
 
     <script>
         $( function() {
-            $( "#report_date_finish" ).datepicker({ dateFormat: 'dd-mm-yy', showAnim: 'blind'}).val();
+            $( "#report_date_finish" ).datepicker({
+                dateFormat: 'dd-mm-yy',
+                monthNames : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+	            dayNamesMin : ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+                showAnim: 'blind'}).val();
             $( "#anim" ).on( "change", function() {
                 $( "#report_date_finish" ).datepicker( "option", "showAnim", $( this ).val() );
             });

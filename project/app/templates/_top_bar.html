@@ -2,12 +2,7 @@
     <div class="top-bar-left">
         <ul class="menu">
             <li><a href="{{ url_for('index') }}" style="margin: 0 5px">Главная</a></li>
-            {% if current_user.is_administrator %}
-                <li><a href="{{ url_for('admin_page') }}">Администратор</a></li>
-            {% endif %}
-            {% if current_user.is_moderator %}
-                <li><a href="{{ url_for('moderator_page') }}">Модератор</a></li>
-            {% endif %}
+
             <li><a href="{{ url_for('computer_orders') }}">Заявки ПК</a></li>
             <li><a href="{{ url_for('group_orders') }}">Группы заявок ПК</a></li>
             <li><a href="{{ url_for('my_computer_orders') }}">Мои заявки ПК</a></li>
@@ -18,10 +13,17 @@
             <li><a href="{{ url_for('consultations') }}">Консультации</a></li>
             <li><a href="{{ url_for('group_consultations') }}">Консультации Отдела</a></li>
             <li><a href="{{ url_for('my_consultations') }}">Мои консультации</a></li>
+        </ul>
+        <ul class="menu">
+            {% if current_user.is_administrator %}
+                <li><a href="{{ url_for('admin_page') }}">Администратор</a></li>
+            {% endif %}
+            {% if current_user.is_moderator %}
+                <li><a href="{{ url_for('moderator_page') }}">Модератор</a></li>
+            {% endif %}
             {% if current_user.is_speaker_consultations %}
                 <li><a href="{{ url_for('analytic_consultations') }}">Отчет по консультациям</a></li>
             {% endif %}
-
         </ul>
     </div>
     <div class="top-bar-right">

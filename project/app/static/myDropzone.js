@@ -23,6 +23,7 @@ Dropzone.options.dropper = {
     },
 
     init: function () {
+        $('.edit_order').hide();
         // this.on("maxfilesexceeded", function(file){
         //     if (!alert_msg) {
         //         alert("Вы добавили много файлов, лишние не буду добавлены в заявку! " +
