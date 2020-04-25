@@ -47,12 +47,71 @@
                 </div>
             </div>
     </form>
-
-    <div style="margin: 20px;">
-            <h4>Консультации:</h4>
+    {% if report_department %}
+        <div style="margin: 20px;">
+            <p>Отчётный период: {{ form.report_date_start.data }} - {{ form.report_date_finish.data }}</p>
             <hr>
             {% if consultations %}
-                <p>Отчётный период: {{ form.report_date_start.data }} - {{ form.report_date_finish.data }}</p>
+                <div class="grid-x grid-padding-x" style="padding-top: 30px">
+                    <div class="cell small-6">
+                        <h4>Всего по отделам:</h4>
+                        <br>
+                        <table class="unstriped small-6">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; min-width: 140px;">Отдел</th>
+                                    <th style="text-align: center; min-width: 70px;">Количество</th>
+                                    <th style="text-align: center; min-width: 110px;">Сотрудники</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key, value in report_department.items() %}
+                                    {% if value['count'] %}
+                                        <tr>
+                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ key }}</td>
+                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ value['count'] }}</td>
+                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; padding-top: 20px;">
+                                                {% for key, value in value['users'].items() %}
+                                                    {% if value %}
+                                                        <p style="line-height: 0.3;">{{ key }} - {{ value }}</p>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <br>
+                    </div>
+                    <div class="cell small-6">
+                        <h4>Всего по темам:</h4>
+                        <br>
+                        <table class="unstriped small-6">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center; min-width: 140px;">Тема</th>
+                                    <th style="text-align: center; min-width: 70px;">Количество</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for key, value in report_theme_consultations.items() %}
+                                {% if value %}
+                                    <tr>
+                                        <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ key }}</td>
+                                        <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; padding-top: 20px;">
+                                            <p style="line-height: 0.3;">{{ value }}</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <br>
+                    </div>
+                </div>
+                <hr>
+                <h4>Консультации:</h4>
                 <table class="unstriped">
                 <thead>
                     <tr>
@@ -85,7 +144,7 @@
                 <p style="text-align: center">Нет консультаций.</p>
             {% endif %}
         </div>
-
+    {% endif %}
 
 {% endblock %}
 

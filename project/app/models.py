@@ -12,8 +12,8 @@ class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     users = db.relationship('User', backref='role')
 
@@ -44,8 +44,8 @@ class User(db.Model, UserMixin):
     internal_phone = db.Column(db.String(50))
     password_hash = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     department_id = db.Column(db.Integer(), db.ForeignKey('departments.id'), nullable=False)
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id'), nullable=False)
@@ -100,8 +100,8 @@ class Position(db.Model):
     name = db.Column(db.String(512), nullable=False, unique=True)
     description = db.Column(db.String(255))
     chief = db.Column(db.Boolean, default=False)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     users = db.relationship('User', backref='position')
 
@@ -118,8 +118,8 @@ class Organization(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(512), nullable=False)
     description = db.Column(db.String(255))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     departments = db.relationship('Department', backref='organization')
 
@@ -130,8 +130,8 @@ class Department(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     organization_id = db.Column(db.Integer(), db.ForeignKey('organizations.id'))
     users = db.relationship('User', backref='department')
@@ -154,8 +154,8 @@ class Note(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(2048))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
@@ -170,8 +170,8 @@ class Consultation(db.Model):
     reg_number = db.Column(db.String(255))
     person = db.Column(db.String(255))
     status = db.Column(db.Boolean, default=True)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
@@ -182,8 +182,8 @@ class ThemeConsultation(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False, unique=True)
     description = db.Column(db.String(255))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
@@ -200,8 +200,8 @@ class Recommendation(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(2048))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
 
@@ -212,8 +212,8 @@ class Order(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(2048), nullable=False)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     group_order_id = db.Column(db.Integer(), db.ForeignKey('group_orders.id'))
@@ -233,8 +233,8 @@ class GroupOrder(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(512))
     status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['in_work'])
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     performer_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     orders = db.relationship('Order', backref='group_order')
@@ -248,8 +248,8 @@ class Service(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
     description = db.Column(db.String(512))
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
 
 class Result(db.Model):
@@ -259,8 +259,8 @@ class Result(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(512))
     positive = db.Column(db.Boolean, default=False)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     group_order_id = db.Column(db.Integer(), db.ForeignKey('group_orders.id'))
 
@@ -273,7 +273,7 @@ class File(db.Model):
     hash = db.Column(db.String(255), nullable=False)
     path = db.Column(db.String(255), nullable=False)
     total_size = db.Column(db.Integer, nullable=False)
-    timestamp_created = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp_created = db.Column(db.DateTime, default=datetime.now)
 
     order_id = db.Column(db.Integer(), db.ForeignKey('orders.id'))
 
@@ -291,7 +291,7 @@ class Version(db.Model):
     version = db.Column(db.String(255), nullable=False)
     user_description = db.Column(db.String(2048), nullable=False)
     admin_description = db.Column(db.String(2048), nullable=False)
-    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
-    updated_on = db.Column(db.DateTime(), default=datetime.utcnow,  onupdate=datetime.utcnow)
+    created_on = db.Column(db.DateTime(), default=datetime.now)
+    updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))

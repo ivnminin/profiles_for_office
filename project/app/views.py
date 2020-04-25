@@ -380,17 +380,53 @@ def change_status_consultation(id):
 def analytic_consultations():
 
     consultations = None
+    report_department =  None
+    report_theme_consultations = None
 
     form = AnalyticConsultationsForm()
     if form.validate_on_submit():
+
+        report_department = dict()
+
+        departments = db.session.query(Department).all()
+        for department in  departments:
+
+            report_department.update({department.name: {'count': 0, 'users': {}}})
+
+            for user in department.users:
+
+                user_consultations = db.session.query(Consultation).filter(Consultation.status)\
+                                  .filter(Consultation.created_on >= form.report_date_start.data) \
+                                  .filter(Consultation.created_on <= form.report_date_finish.data + timedelta(days=1)) \
+                                  .filter(Consultation.user == user)\
+                                  .order_by(db.desc(Consultation.created_on)).all()
+
+                report_department[department.name]['count'] += len(user_consultations)
+                report_department[department.name]['users'].update({user.full_name: len(user_consultations)})
+
+        report_theme_consultations = dict()
+
+        theme_consultations = db.session.query(ThemeConsultation).all()
+        for theme_consultation in theme_consultations:
+            consultations = db.session.query(Consultation).filter(Consultation.status) \
+                            .filter(Consultation.created_on >= form.report_date_start.data) \
+                            .filter(Consultation.created_on <= form.report_date_finish.data + timedelta(days=1)) \
+                            .filter(Consultation.name == theme_consultation.name) \
+                            .order_by(db.desc(Consultation.created_on)).all()
+
+            report_theme_consultations.update({theme_consultation.name: len(consultations)})
+
         consultations = db.session.query(Consultation).filter(Consultation.status)\
                                   .filter(Consultation.created_on >= form.report_date_start.data) \
                                   .filter(Consultation.created_on <= form.report_date_finish.data + timedelta(days=1)) \
                                   .order_by(db.desc(Consultation.created_on)).all()
 
         flash("Отчёт создан.", 'success')
-        return render_template('analytic_consultations.html', form=form, consultations=consultations)
-    return render_template('analytic_consultations.html', form=form, consultations=consultations)
+        return render_template('analytic_consultations.html', form=form, consultations=consultations,
+                               report_department=report_department,
+                               report_theme_consultations=report_theme_consultations)
+    return render_template('analytic_consultations.html', form=form, consultations=consultations,
+                           report_department=report_department, report_theme_consultations=report_theme_consultations)
 
 
 @app.route('/recommendations')
