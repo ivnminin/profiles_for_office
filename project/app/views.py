@@ -101,6 +101,7 @@ def profile():
 def my_computer_orders():
 
     filter = request.args.get('filter')
+
     if filter == 'new':
         orders = db.session.query(Order).filter(Order.user == current_user, Order.group_order == None)\
                                         .order_by(db.desc(Order.created_on)).all()
@@ -109,10 +110,18 @@ def my_computer_orders():
             .filter(Order.user==current_user, Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
             .order_by(db.desc(Order.created_on)).all()
     else:
-        orders = db.session.query(Order).filter(Order.user==current_user).order_by(db.desc(Order.created_on)).all()
+        page = request.args.get('page', 1, type=int)
+        per_page = app.config['ITEMS_PER_PAGE']
+
+        orders = db.session.query(Order).filter(Order.user==current_user)\
+            .order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+
+        next_url = url_for('my_computer_orders', page=orders.next_num) if orders.has_next else None
+        prev_url = url_for('my_computer_orders', page=orders.prev_num) if orders.has_prev else None
+
+        return render_template('my_computer_orders.html', orders=orders.items, next_url=next_url, prev_url=prev_url)
 
     return render_template('my_computer_orders.html', orders=orders)
-
 
 @app.route('/computer-orders')
 @login_required
@@ -127,7 +136,15 @@ def computer_orders():
             .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
             .order_by(db.desc(Order.created_on)).all()
     else:
-        orders = db.session.query(Order).order_by(db.desc(Order.created_on)).all()
+        page = request.args.get('page', 1, type=int)
+        per_page = app.config['ITEMS_PER_PAGE']
+
+        orders = db.session.query(Order).order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+
+        next_url = url_for('computer_orders', page=orders.next_num) if orders.has_next else None
+        prev_url = url_for('computer_orders', page=orders.prev_num) if orders.has_prev else None
+
+        return render_template('computer_orders.html', orders=orders.items, next_url=next_url, prev_url=prev_url)
 
     return render_template('computer_orders.html', orders=orders)
 
@@ -178,8 +195,18 @@ def group_orders():
                                  .filter(GroupOrder.status==filter)\
                                  .order_by(db.desc(GroupOrder.created_on)).all()
     else:
-        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.created_on)).all()
 
+        page = request.args.get('page', 1, type=int)
+        per_page = app.config['ITEMS_PER_PAGE']
+
+        group_orders = db.session.query(GroupOrder).order_by(db.desc(GroupOrder.created_on))\
+                                                   .paginate(page, per_page, False)
+
+        next_url = url_for('group_orders', page=group_orders.next_num) if group_orders.has_next else None
+        prev_url = url_for('group_orders', page=group_orders.prev_num) if group_orders.has_prev else None
+
+        return render_template('group_orders.html', group_orders=group_orders.items,
+                               next_url=next_url, prev_url=prev_url)
 
     return render_template('group_orders.html', group_orders=group_orders)
 
@@ -268,30 +295,51 @@ def add_note():
 @app.route('/consultations')
 @login_required
 def consultations():
+    page = request.args.get('page', 1, type=int)
+    per_page = app.config['ITEMS_PER_PAGE']
 
-    consultations = db.session.query(Consultation).order_by(db.desc(Consultation.created_on)).all()
+    consultations = db.session.query(Consultation).order_by(db.desc(Consultation.created_on)) \
+                                                 .paginate(page, per_page, False)
 
-    return render_template('consultations.html', consultations=consultations)
+    next_url = url_for('consultations', page=consultations.next_num) if consultations.has_next else None
+    prev_url = url_for('consultations', page=consultations.prev_num) if consultations.has_prev else None
+
+    return render_template('consultations.html', consultations=consultations.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/group-consultations')
 @login_required
 def group_consultations():
+    page = request.args.get('page', 1, type=int)
+    per_page = app.config['ITEMS_PER_PAGE']
 
     consultations = db.session.query(Consultation).join(User).filter(User.department==current_user.department) \
-                                                  .order_by(db.desc(Consultation.created_on)).all()
+                                                  .order_by(db.desc(Consultation.created_on))\
+                                                  .paginate(page, per_page, False)
 
-    return render_template('consultations.html', consultations=consultations, next_page='group-consultations')
+    next_url = url_for('group_consultations', page=consultations.next_num) if consultations.has_next else None
+    prev_url = url_for('group_consultations', page=consultations.prev_num) if consultations.has_prev else None
+
+    return render_template('consultations.html', consultations=consultations.items, next_page='group-consultations',
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/my-consultations')
 @login_required
 def my_consultations():
+    page = request.args.get('page', 1, type=int)
+    per_page = app.config['ITEMS_PER_PAGE']
 
     consultations = db.session.query(Consultation).filter(Consultation.user==current_user)\
-                                                  .order_by(db.desc(Consultation.created_on)).all()
+                                                  .order_by(db.desc(Consultation.created_on))\
+                                                  .paginate(page, per_page, False)
 
-    return render_template('consultations.html', consultations=consultations, next_page='my-consultations')
+    next_url = url_for('my_consultations', page=consultations.next_num) if consultations.has_next else None
+    prev_url = url_for('my_consultations', page=consultations.prev_num) if consultations.has_prev else None
+
+    return render_template('consultations.html', consultations=consultations.items, next_page='my-consultations',
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/add-consultation', methods=['GET', 'POST'])

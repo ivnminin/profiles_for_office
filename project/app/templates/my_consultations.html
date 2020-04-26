@@ -38,19 +38,28 @@
                 <tbody>
                     {% for consultation in consultations %}
                         <tr>
-                            <td style="text-align: center">{{ consultation.id }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.description }}</td>
-                            <td>{{ consultation.organization }}</td>
-                            <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ consultation.id }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.description }}</td>
+                            <td style="border: 1px grey solid;">{{ consultation.organization }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             {% if current_user.position.chief %}
-                                <td style="text-align: center;"><a href="#"><a href="{{ url_for('add_consultation', id=consultation.id)}}">Редактировать</a></a></td>
-                                <td style="text-align: center;"><a href="#">Отменить</a></td>
+                                <td style="text-align: center; border: 1px grey solid;"><a href="#"><a href="{{ url_for('add_consultation', id=consultation.id)}}">Редактировать</a></a></td>
+                                <td style="text-align: center; border: 1px grey solid;"><a href="#">Отменить</a></td>
                             {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <br>
+            <span>
+                {% if prev_url %}
+                    <a href="{{ prev_url }}">Предыдущие записи</a>
+                {% endif %}
+                {% if next_url %}
+                    <a href="{{ next_url }}">Следующие записи</a>
+                {% endif %}
+            </span><p><br></p>
             {% else %}
                 <p style="text-align: center">Нет консультаций.</p>
             {% endif %}

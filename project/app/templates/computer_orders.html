@@ -48,20 +48,29 @@
                 <tbody>
                     {% for order in orders %}
                         <tr {{ order.group_order.status | view_status_css | safe}}>
-                            <td style="text-align: center">{{ order.id }}</td>
-                            <td style="text-align: center">{{ order.user.full_name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.description | first_symbols }}</td>
-                            <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center">{{ order.group_order.status | view_status }}</td>
-                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>
-                            <td style="text-align: center">
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.user.full_name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px; border: 1px grey solid;">{{ order.name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px; border: 1px grey solid;">{{ order.description | first_symbols }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.group_order.status | view_status }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>
+                            <td style="text-align: center; border: 1px grey solid;">
                                 <a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Переместить {% endif %}</a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <br>
+            <span>
+                {% if prev_url %}
+                    <a href="{{ prev_url }}">Предыдущие записи</a>
+                {% endif %}
+                {% if next_url %}
+                    <a href="{{ next_url }}">Следующие записи</a>
+                {% endif %}
+            </span><p><br></p>
             {% else %}
                 <p style="text-align: center">Нет заявок.</p>
             {% endif %}

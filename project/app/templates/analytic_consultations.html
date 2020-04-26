@@ -5,147 +5,152 @@
 
 {% block content %}
 
-    <form method="POST" action="">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="grid-container">
-                <br>
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <div class="callout success">
-                            {% for message in messages %}
-                                <p>{{ message | safe }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-                <br>
-                <h5>Необходимо выбрать даты:</h5>
-                <div class="grid-x" style="padding-top: 10px">
-                    <div class="medium-3 cell" style="margin-right: 30px;">
-                        <label>От: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
-                            {{ form.report_date_start(required=False) }}
-                        </label>
-                        {% if form.report_date_start.errors %}
-                            {% for error in form.report_date_start.errors %}
-                                <p class="error-title" style="color: red">{{ error }}<p>
-                            {% endfor %}
+    <div id="gif" style="padding-top: 230px; display: none; text-align: center;">
+        <p>Необходимо ожидать.</p>
+        <img src="{{ url_for('static', filename='preloader.gif') }}" />
+    </div>
+    <div id="view_block">
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="grid-container">
+                    <br>
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="callout success">
+                                {% for message in messages %}
+                                    <p>{{ message | safe }}</p>
+                                {% endfor %}
+                            </div>
                         {% endif %}
+                    {% endwith %}
+                    <br>
+                    <h5>Необходимо выбрать даты:</h5>
+                    <div class="grid-x" style="padding-top: 10px">
+                        <div class="medium-3 cell" style="margin-right: 30px;">
+                            <label>От: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                                {{ form.report_date_start(required=False) }}
+                            </label>
+                            {% if form.report_date_start.errors %}
+                                {% for error in form.report_date_start.errors %}
+                                    <p class="error-title" style="color: red">{{ error }}<p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="medium-3 cell">
+                            <label>До: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
+                                {{ form.report_date_finish(required=False) }}
+                            </label>
+                           {% if form.report_date_finish.errors %}
+                                {% for error in form.report_date_finish.errors %}
+                                    <p class="error-title" style="color: red">{{ error }}<p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="medium-3 cell">
-                        <label>До: <span style="font-size: x-small">* - Обязательно для заполенения!</span>
-                            {{ form.report_date_finish(required=False) }}
-                        </label>
-                       {% if form.report_date_finish.errors %}
-                            {% for error in form.report_date_finish.errors %}
-                                <p class="error-title" style="color: red">{{ error }}<p>
-                            {% endfor %}
-                        {% endif %}
+                        <input type="submit" id="submit" class="button" value="Создать" onclick="$('#view_block').hide(); $('#gif').show();">
                     </div>
                 </div>
-                <div class="medium-3 cell">
-                    <input type="submit" id="submit" class="button" value="Создать">
-                </div>
-            </div>
-    </form>
-    {% if report_department %}
-        <div style="margin: 20px;">
-            <p>Отчётный период: {{ form.report_date_start.data }} - {{ form.report_date_finish.data }}</p>
-            <hr>
-            {% if consultations %}
-                <div class="grid-x grid-padding-x" style="padding-top: 30px">
-                    <div class="cell small-6">
-                        <h4>Всего по отделам:</h4>
-                        <br>
-                        <table class="unstriped small-6">
-                            <thead>
-                                <tr>
-                                    <th style="text-align: center; min-width: 140px;">Отдел</th>
-                                    <th style="text-align: center; min-width: 70px;">Количество</th>
-                                    <th style="text-align: center; min-width: 110px;">Сотрудники</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for key, value in report_department.items() %}
-                                    {% if value['count'] %}
+        </form>
+        {% if report_department %}
+            <div style="margin: 20px;">
+                <p>Отчётный период: {{ form.report_date_start.data }} - {{ form.report_date_finish.data }}</p>
+                <hr>
+                {% if consultations %}
+                    <div class="grid-x grid-padding-x" style="padding-top: 30px">
+                        <div class="cell small-6" style="min-width: 300px">
+                            <h4>Всего по отделам:</h4>
+                            <br>
+                            <table class="unstriped">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: center;">Отдел</th>
+                                        <th style="text-align: center;">Количество</th>
+                                        <th style="text-align: center;">Сотрудники</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key, value in report_department.items() %}
+                                        {% if value['count'] %}
+                                            <tr>
+                                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ key }}</td>
+                                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; text-align: center;">{{ value['count'] }}</td>
+                                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">
+                                                    {% for key, value in value['users'].items() %}
+                                                        {% if value %}
+                                                            <p>{{ key }} - {{ value }}</p>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                        <div class="cell small-6">
+                            <h4>Всего по темам:</h4>
+                            <br>
+                            <table class="unstriped small-6">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: center;">Тема</th>
+                                        <th style="text-align: center;">Количество</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for key, value in report_theme_consultations.items() %}
+                                    {% if value %}
                                         <tr>
                                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ key }}</td>
-                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ value['count'] }}</td>
-                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; padding-top: 20px;">
-                                                {% for key, value in value['users'].items() %}
-                                                    {% if value %}
-                                                        <p style="line-height: 0.3;">{{ key }} - {{ value }}</p>
-                                                    {% endif %}
-                                                {% endfor %}
+                                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; text-align: center;">
+                                            {{ value }}
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                        <br>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
                     </div>
-                    <div class="cell small-6">
-                        <h4>Всего по темам:</h4>
-                        <br>
-                        <table class="unstriped small-6">
-                            <thead>
-                                <tr>
-                                    <th style="text-align: center; min-width: 140px;">Тема</th>
-                                    <th style="text-align: center; min-width: 70px;">Количество</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for key, value in report_theme_consultations.items() %}
-                                {% if value %}
-                                    <tr>
-                                        <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ key }}</td>
-                                        <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid; padding-top: 20px;">
-                                            <p style="line-height: 0.3;">{{ value }}</p>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <br>
-                    </div>
-                </div>
-                <hr>
-                <h4>Консультации:</h4>
-                <table class="unstriped">
-                <thead>
-                    <tr>
-                        <th style="text-align: center">№</th>
-                        <th style="text-align: center; min-width: 140px;">Тема</th>
-                        <th style="text-align: center; min-width: 200px;">Описание</th>
-                        <th style="text-align: center; min-width: 110px;">Организация</th>
-                        <th style="text-align: center; min-width: 100px">Рег. Номер</th>
-                        <th style="text-align: center; min-width: 100px">ФИО задавшего вопрос, контакты</th>
-                        <th style="text-align: center; min-width: 100px">Добавил</th>
-                        <th style="text-align: center; min-width: 70px">Дата создания</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for consultation in consultations %}
+                    <hr>
+                    <h4>Консультации:</h4>
+                    <table class="unstriped">
+                    <thead>
                         <tr>
-                            <td style="text-align: center">{{ consultation.id }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.description }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.organization }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.reg_number }}</td>
-                            <td>{{ consultation.person }}</td>
-                            <td>{{ consultation.user.full_name }}</td>
-                            <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <th style="text-align: center">№</th>
+                            <th style="text-align: center; min-width: 140px;">Тема</th>
+                            <th style="text-align: center; min-width: 200px;">Описание</th>
+                            <th style="text-align: center; min-width: 110px;">Организация</th>
+                            <th style="text-align: center; min-width: 100px">Рег. Номер</th>
+                            <th style="text-align: center; min-width: 100px">ФИО задавшего вопрос, контакты</th>
+                            <th style="text-align: center; min-width: 100px">Добавил</th>
+                            <th style="text-align: center; min-width: 70px">Дата создания</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-                <p style="text-align: center">Нет консультаций.</p>
-            {% endif %}
-        </div>
-    {% endif %}
-
+                    </thead>
+                    <tbody>
+                        {% for consultation in consultations %}
+                            <tr>
+                                <td style="text-align: center; border: 1px grey solid;">{{ consultation.id }}</td>
+                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.name }}</td>
+                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.description }}</td>
+                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.organization }}</td>
+                                <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.reg_number }}</td>
+                                <td style="border: 1px grey solid;">{{ consultation.person }}</td>
+                                <td style="border: 1px grey solid;"> {{ consultation.user.full_name }}</td>
+                                <td style="text-align: center; border: 1px grey solid;">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p style="text-align: center">Нет консультаций.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block script%}
@@ -162,7 +167,7 @@
                 $( "#report_date_start" ).datepicker( "option", "showAnim", $( this ).val() );
             });
         } );
-      </script>
+    </script>
 
     <script>
         $( function() {
@@ -176,6 +181,5 @@
             });
         } );
       </script>
-
 
 {% endblock %}

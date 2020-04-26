@@ -40,17 +40,17 @@
                 </thead>
                 <tbody>
                     {% for consultation in consultations %}
-                        <tr {% if not consultation.status %} style="background-color: #b1abab "{% endif %}>
-                            <td style="text-align: center">{{ consultation.id }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.description }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.organization }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.reg_number }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all;">{{ consultation.person }}</td>
-                            <td>{{ consultation.user.full_name }}</td>
-                            <td style="text-align: center">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                        <tr {% if not consultation.status %} style="background-color: #b1abab; border: 1px grey solid;" {% else %}style="border: 1px grey solid;"{% endif %}>
+                            <td style="text-align: center; border: 1px grey solid;">{{ consultation.id }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.description }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.organization }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.reg_number }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ consultation.person }}</td>
+                            <td style="border: 1px grey solid;">{{ consultation.user.full_name }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ consultation.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             {% if current_user.position.chief %}
-                                <td style="text-align: center;"><a href="#">
+                                <td style="text-align: center; border: 1px grey solid;"><a href="#">
                                     {% if current_user.department == consultation.user.department %}
                                         <a href="{{ url_for('add_consultation', id=consultation.id, next_page=next_page)}}">Редактировать</a></a>
                                     {% else %}
@@ -59,16 +59,16 @@
 
                                     {% if current_user.department == consultation.user.department %}
                                         {% if consultation.status %}
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; border: 1px grey solid;">
                                                 <a href="{{ url_for('change_status_consultation', id=consultation.id, status='off', next_page=next_page)}}">Отменить</a>
                                             </td>
                                         {% else %}
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; border: 1px grey solid;">
                                                 <a href="{{ url_for('change_status_consultation', id=consultation.id, status='on', next_page=next_page)}}">Вернуть</a>
                                             </td>
                                         {% endif %}
                                     {% else %}
-                                        <td style="text-align: center;">
+                                        <td style="text-align: center; border: 1px grey solid;">
                                         </td>
                                     {%endif %}
 
@@ -77,6 +77,15 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <br>
+            <span>
+                {% if prev_url %}
+                    <a href="{{ prev_url }}">Предыдущие записи</a>
+                {% endif %}
+                {% if next_url %}
+                    <a href="{{ next_url }}">Следующие записи</a>
+                {% endif %}
+            </span><p><br></p>
             {% else %}
                 <p style="text-align: center">Нет консультаций.</p>
             {% endif %}

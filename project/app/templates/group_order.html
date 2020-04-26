@@ -112,14 +112,14 @@
                 <tbody>
                     {% for order in group_order.orders %}
                         <tr>
-                            <td style="text-align: center">{{ order.id }}</td>
-                            <td style="text-align: center">{{ order.user.full_name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.name }}</td>
-                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px;">{{ order.description | first_symbols }}</td>
-                            <td style="text-align: center">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center">{{ order.group_order.status | view_status}}</td>
-                            <td style="text-align: center">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>
-                            <td style="text-align: center"><a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть</a></td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.user.full_name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px; border: 1px grey solid;">{{ order.name }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; min-width: 250px; border: 1px grey solid;">{{ order.description | first_symbols }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.group_order.status | view_status}}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</td>
+                            <td style="text-align: center; border: 1px grey solid;"><a href="{{ url_for('.computer_order', id=order.id) }}">Посмотреть</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
