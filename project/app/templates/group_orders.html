@@ -42,7 +42,7 @@
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.description }}</td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center; border: 1px grey solid; min-width: 100px">{% if not order.orders %} <span style="color: red"> Еще нет заявок </span> {% else %} {{ order.status | view_status }} {% endif %}</td>
-                            <td style="text-align: center; border: 1px grey solid;">{{ order.user_performer.name }}</td>
+                            <td style="text-align: center; border: 1px grey solid;">{{ order.user_performer.full_name }}</td>
                             <td style="text-align: center; border: 1px grey solid;"><a href="{{ url_for('.group_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Редактировать{% endif %}</a></td>
                         </tr>
                     {% endfor %}

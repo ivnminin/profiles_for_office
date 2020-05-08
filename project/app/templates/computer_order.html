@@ -18,8 +18,8 @@
             <hr style="max-width: none; padding-top: 10px;">
             <div><p style="display: inline;"><strong>Номер заявки: </strong></p><p style="display: inline;">{{ order.id }}</p></div>
             <div><p style="display: inline;"><strong>Заявитель: </strong></p><p style="display: inline;">{{ order.user.full_name }}</p></div>
-            <div><p style="display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ order.name }}</p></div>
-            <div><p style="display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ order.description}}</p></div>
+            <div><p style="word-wrap: break-word; word-break: break-all; display: inline;"><strong>Тема: </strong></p><p style="display: inline;">{{ order.name }}</p></div>
+            <div><p style="word-wrap: break-word; word-break: break-all; display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ order.description}}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
             <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ order.group_order.status | view_status }}</p></div>
             <div><p style="display: inline;"><strong>Состоит в группе: </strong></p><p style="display: inline;">{% if order.group_order %} № {{ order.group_order.id }}, {{ order.group_order.name }} {% else %} Еще нет группы, необходимо выбрать {% endif %}</p></div>
