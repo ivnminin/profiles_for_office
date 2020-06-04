@@ -30,6 +30,15 @@
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='in_work') }}">В работе</a></p>
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='closed') }}">Закрытые</a></p>
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='cancelled') }}">Отмененные</a></p>
+                {% if users %}
+                    <a id="users" style="padding: 0 20px; display: inline;">Еще</a>
+                    <div id="show_users" style="display: none">
+                        {% for user in users %}
+                            <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='user', user=user.id) }}">{{ user.full_name }}</a></p>
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
             </div>
             {% if orders %}
                 <table class="hover">
@@ -77,5 +86,16 @@
         </div>
     </div>
 
+
+{% endblock %}
+
+{% block script%}
+    {{ super() }}
+
+    <script type="application/javascript">
+        $('#users').click(function(){
+            $('#show_users').toggle();
+        });
+    </script>
 
 {% endblock %}

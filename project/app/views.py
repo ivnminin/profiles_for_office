@@ -127,26 +127,42 @@ def my_computer_orders():
 @login_required
 def computer_orders():
 
+    users = db.session.query(User).order_by(db.desc(User.name)).all()
+
+    page = request.args.get('page', 1, type=int)
+    per_page = app.config['ITEMS_PER_PAGE']
+
     filter = request.args.get('filter')
     if filter == 'new':
         orders = db.session.query(Order).filter(Order.group_order == None)\
-                                        .order_by(db.desc(Order.created_on)).all()
+                                        .order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+        next_url = url_for('computer_orders', page=orders.next_num, filter=filter) if orders.has_next else None
+        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter) if orders.has_prev else None
+    elif filter == 'user':
+        user_id = request.args.get('user', type=int)
+        user = db.session.query(User).filter(User.id == user_id).first_or_404()
+        orders = db.session.query(Order).filter(Order.user == user).order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+        next_url = url_for('computer_orders',
+                           page=orders.next_num, filter=filter, user=user_id) if orders.has_next else None
+        prev_url = url_for('computer_orders',
+                           page=orders.prev_num, filter=filter, user=user_id) if orders.has_prev else None
     elif filter:
         orders = db.session.query(Order)\
             .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
-            .order_by(db.desc(Order.created_on)).all()
+            .order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+        next_url = url_for('computer_orders', page=orders.next_num, filter=filter) if orders.has_next else None
+        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter) if orders.has_prev else None
     else:
-        page = request.args.get('page', 1, type=int)
-        per_page = app.config['ITEMS_PER_PAGE']
 
         orders = db.session.query(Order).order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
 
         next_url = url_for('computer_orders', page=orders.next_num) if orders.has_next else None
         prev_url = url_for('computer_orders', page=orders.prev_num) if orders.has_prev else None
 
-        return render_template('computer_orders.html', orders=orders.items, next_url=next_url, prev_url=prev_url)
+    return render_template('computer_orders.html', orders=orders.items, users=users,
+                               next_url=next_url, prev_url=prev_url)
 
-    return render_template('computer_orders.html', orders=orders)
+    # return render_template('computer_orders.html', orders=orders, users=users)
 
 
 @app.route('/computer-order/<id>', methods=['GET', 'POST'])
@@ -295,6 +311,8 @@ def add_note():
 @app.route('/consultations')
 @login_required
 def consultations():
+    users = db.session.query(User).order_by(db.desc(User.name)).all()
+
     page = request.args.get('page', 1, type=int)
     per_page = app.config['ITEMS_PER_PAGE']
 
@@ -304,7 +322,7 @@ def consultations():
     next_url = url_for('consultations', page=consultations.next_num) if consultations.has_next else None
     prev_url = url_for('consultations', page=consultations.prev_num) if consultations.has_prev else None
 
-    return render_template('consultations.html', consultations=consultations.items,
+    return render_template('consultations.html', consultations=consultations.items, users=users,
                            next_url=next_url, prev_url=prev_url)
 
 
@@ -365,7 +383,7 @@ def add_consultation(id=None):
 
         if request.method == 'POST' and form.validate_on_submit():
 
-            consultation.name = form.title.data
+            consultation.name = form.title.dataform.title.data
             consultation.description = form.description.data
             consultation.organization = form.organization.data
             consultation.reg_number = form.reg_number.data

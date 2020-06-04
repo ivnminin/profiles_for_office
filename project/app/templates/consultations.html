@@ -19,7 +19,17 @@
         </div>
         <div style="margin: 20px;">
             <h4>Консультации:</h4>
-            <br>
+            <div style="margin: 20px;">
+                {% if users %}
+                    <a id="users" style="padding: 0 20px; display: inline;">Еще</a>
+                    <div id="show_users" style="display: none">
+                        {% for user in users %}
+                            <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('computer_orders', filter='user') }}">{{ user.full_name }}</a></p>
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
+            </div>
             {% if consultations %}
                 <table class="unstriped">
                 <thead>
@@ -91,5 +101,16 @@
             {% endif %}
         </div>
     </div>
+
+{% endblock %}
+
+{% block script%}
+    {{ super() }}
+
+    <script type="application/javascript">
+        $('#users').click(function(){
+            $('#show_users').toggle();
+        });
+    </script>
 
 {% endblock %}
