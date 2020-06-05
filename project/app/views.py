@@ -136,33 +136,34 @@ def computer_orders():
     if filter == 'new':
         orders = db.session.query(Order).filter(Order.group_order == None)\
                                         .order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
-        next_url = url_for('computer_orders', page=orders.next_num, filter=filter) if orders.has_next else None
-        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter) if orders.has_prev else None
+        next_url = url_for('computer_orders', page=orders.next_num, filter=filter)
+        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter)
+
     elif filter == 'user':
         user_id = request.args.get('user', type=int)
         user = db.session.query(User).filter(User.id == user_id).first_or_404()
-        orders = db.session.query(Order).filter(Order.user == user).order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
-        next_url = url_for('computer_orders',
-                           page=orders.next_num, filter=filter, user=user_id) if orders.has_next else None
-        prev_url = url_for('computer_orders',
-                           page=orders.prev_num, filter=filter, user=user_id) if orders.has_prev else None
+        orders = db.session.query(Order).filter(Order.user == user).order_by(db.desc(Order.created_on))\
+                                        .paginate(page, per_page, False)
+        next_url = url_for('computer_orders', page=orders.next_num, filter=filter, user=user_id)
+        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter, user=user_id)
     elif filter:
         orders = db.session.query(Order)\
             .filter(Order.group_order).join(GroupOrder).filter(GroupOrder.status==filter)\
             .order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
-        next_url = url_for('computer_orders', page=orders.next_num, filter=filter) if orders.has_next else None
-        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter) if orders.has_prev else None
+        next_url = url_for('computer_orders', page=orders.next_num, filter=filter)
+        prev_url = url_for('computer_orders', page=orders.prev_num, filter=filter)
+
     else:
 
         orders = db.session.query(Order).order_by(db.desc(Order.created_on)).paginate(page, per_page, False)
+        next_url = url_for('computer_orders', page=orders.next_num)
+        prev_url = url_for('computer_orders', page=orders.prev_num)
 
-        next_url = url_for('computer_orders', page=orders.next_num) if orders.has_next else None
-        prev_url = url_for('computer_orders', page=orders.prev_num) if orders.has_prev else None
+    next_url = next_url if orders.has_next else None
+    prev_url = prev_url if orders.has_prev else None
 
     return render_template('computer_orders.html', orders=orders.items, users=users,
-                               next_url=next_url, prev_url=prev_url)
-
-    # return render_template('computer_orders.html', orders=orders, users=users)
+                                                   next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/computer-order/<id>', methods=['GET', 'POST'])
@@ -316,14 +317,26 @@ def consultations():
     page = request.args.get('page', 1, type=int)
     per_page = app.config['ITEMS_PER_PAGE']
 
-    consultations = db.session.query(Consultation).order_by(db.desc(Consultation.created_on)) \
-                                                 .paginate(page, per_page, False)
+    filter = request.args.get('filter')
+    if filter == 'user':
+        user_id = request.args.get('user', type=int)
+        user = db.session.query(User).filter(User.id == user_id).first_or_404()
+        consultations = db.session.query(Consultation).filter(Consultation.user == user)\
+                                               .order_by(db.desc(Consultation.created_on)) \
+                                               .paginate(page, per_page, False)
+        next_url = url_for('consultations', page=consultations.next_num, filter=filter, user=user_id)
+        prev_url = url_for('consultations', page=consultations.prev_num, filter=filter, user=user_id)
+    else:
+        consultations = db.session.query(Consultation).order_by(db.desc(Consultation.created_on)) \
+                                                      .paginate(page, per_page, False)
+        next_url = url_for('consultations', page=consultations.next_num)
+        prev_url = url_for('consultations', page=consultations.prev_num)
 
-    next_url = url_for('consultations', page=consultations.next_num) if consultations.has_next else None
-    prev_url = url_for('consultations', page=consultations.prev_num) if consultations.has_prev else None
+    next_url = next_url if consultations.has_next else None
+    prev_url = prev_url if consultations.has_prev else None
 
     return render_template('consultations.html', consultations=consultations.items, users=users,
-                           next_url=next_url, prev_url=prev_url)
+                                                 next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/group-consultations')
