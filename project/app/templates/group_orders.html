@@ -26,9 +26,10 @@
                 <thead>
                     <tr>
                         <th style="text-align: center">№</th>
-                        <th style="text-align: center; min-width: 250px;">Тема</th>
-                        <th style="text-align: center; min-width: 250px;">Описание</th>
-                        <th style="text-align: center; min-width: 150px">Дата создания</th>
+                        <th style="text-align: center; min-width: 150px;">Тема</th>
+                        <th style="text-align: center; min-width: 180px;">Описание</th>
+                        <th style="text-align: center; min-width: 200px;">Участники</th>
+                        <th style="text-align: center; min-width: 100px">Дата создания</th>
                         <th style="text-align: center">Статус</th>
                         <th style="text-align: center">Исполнитель</th>
                         <th style="text-align: center">Посмотреть</th>
@@ -36,10 +37,26 @@
                 </thead>
                 <tbody>
                     {% for order in group_orders %}
-                        <tr {% if not order.orders %} {% else %} {{ order.status | view_status_css | safe }} {% endif %}>
+                        <tr {% if not order.orders %}
+                            {% elif order.created_on | view_status_css %}
+                                {{ order.created_on | view_status_css | safe }}
+                            {% elif order.with_support %}
+                                style="background: #ff00d46b;"
+                            {% else %}
+                                {{ order.status | view_status_css | safe }}
+                            {% endif %}>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.name }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.description }}</td>
+                            <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">
+                                {% if order.orders %}
+                                    {% for participant in order.orders %}
+                                <a style="display: block" href="{{ url_for('.computer_order', id=participant.id) }}">Заявка № {{ participant.id }} от {{ participant.user.last_name }}</a>
+                                    {% endfor %}
+                                {% else %}
+                                    Нет участников
+                                {% endif %}
+                            </td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                             <td style="text-align: center; border: 1px grey solid; min-width: 100px">{% if not order.orders %} <span style="color: red"> Еще нет заявок </span> {% else %} {{ order.status | view_status }} {% endif %}</td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.user_performer.full_name }}</td>

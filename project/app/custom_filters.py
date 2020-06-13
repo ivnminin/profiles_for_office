@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
 from jinja2 import environment
 from flask import url_for
+
 
 def generate_custom_filter(app):
 
@@ -19,7 +21,13 @@ def generate_custom_filter(app):
 
     def view_status_css(value):
 
-        if app.config['STATUS_TYPE']['in_work'] == value:
+        if isinstance(value, datetime):
+            today = datetime.now()
+            delta = today - timedelta(days=100)
+            if value < delta:
+                return app.config['STATUS_TYPE_CSS']['in_work_long']
+
+        elif app.config['STATUS_TYPE']['in_work'] == value:
             return app.config['STATUS_TYPE_CSS']['in_work']
 
         elif app.config['STATUS_TYPE']['closed'] == value:

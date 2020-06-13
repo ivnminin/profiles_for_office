@@ -34,7 +34,7 @@
             <div><p style="display: inline;"><strong>Описание: </strong></p><p style="display: inline;">{{ group_order.description }}</p></div>
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ group_order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
             <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ group_order.status | view_status }}</p></div>
-            <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{{ group_order.user_performer.name }}</p></div>
+            <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{{ group_order.user_performer.full_name }}</p></div>
         </div>
         {% if current_user.is_moderator %}
             <div class="cell small-6" style="border-left: solid 1px grey">

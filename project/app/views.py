@@ -784,6 +784,7 @@ def moderator_page_add_group_order(id=None):
             group_order.name = form.title.data,
             group_order.description = form.description.data
             group_order.user_performer = user_performer
+            group_order.with_support = form.with_support.data
             db.session.add(group_order)
             db.session.commit()
 
@@ -795,7 +796,7 @@ def moderator_page_add_group_order(id=None):
 
             user_performer = db.session.query(User).filter(User.id==form.users_performer.data).first_or_404()
             group_order = GroupOrder(name=form.title.data, description=form.description.data,
-                                     user_performer=user_performer)
+                                     user_performer=user_performer, with_support=form.with_support.data)
             db.session.add(group_order)
             db.session.commit()
 

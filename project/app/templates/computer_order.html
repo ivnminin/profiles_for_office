@@ -23,7 +23,7 @@
             <div><p style="display: inline;"><strong>Дата создания: </strong></p><p style="display: inline;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</p></div>
             <div><p style="display: inline;"><strong>Статус: </strong></p><p style="display: inline;">{{ order.group_order.status | view_status }}</p></div>
             <div><p style="display: inline;"><strong>Состоит в группе: </strong></p><p style="display: inline;">{% if order.group_order %} № {{ order.group_order.id }}, {{ order.group_order.name }} {% else %} Еще нет группы, необходимо выбрать {% endif %}</p></div>
-            <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.name }} {% endif %}</p></div>
+            <div><p style="display: inline;"><strong>Исполнитель: </strong></p><p style="display: inline;">{% if order.group_order.user_performer %} {{ order.group_order.user_performer.full_name }} {% endif %}</p></div>
             <hr style="max-width: none;">
             <h5>Скриншоты:</h5>
             {% if order.files %}

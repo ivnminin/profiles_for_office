@@ -223,6 +223,7 @@ class GroupOrderForm(FlaskForm):
                           message='Длина поля не может превышать 512 символов.')], render_kw={"rows": 3, "cols": 50})
     users_performer = SelectField('Users', validators=[DataRequired(message='Это поле является обязательным.')],
                                   coerce=int)
+    with_support = BooleanField("With support")
     submit = SubmitField("Submit")
 
     def __init__(self, users_performer, group_order=None, *args, **kwargs):
@@ -230,14 +231,15 @@ class GroupOrderForm(FlaskForm):
         if group_order:
             self.title.data = group_order.name
             self.description.data = group_order.description
+            self.with_support.data = group_order.with_support
 
         self.users_performer.choices = [(user.id, user.full_name) for user in users_performer]
 
 
 class GroupOrderResultForm(FlaskForm):
     title = TextAreaField("Title", validators=[DataRequired(message='Это поле является обязательным.'),
-                                               Length(max=255, message='Длина поля не может превышать 250 символов.')],
-                                               render_kw={"rows": 3, "cols": 50})
+                                               Length(max=8160, message='Длина поля не может превышать 8160 символов.')],
+                                               render_kw={"rows": 9, "cols": 50})
     positive = BooleanField("Positive")
     submit = SubmitField("Submit")
 

@@ -233,6 +233,7 @@ class GroupOrder(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(512))
     status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['in_work'])
+    with_support = db.Column(db.Boolean, default=False)
     created_on = db.Column(db.DateTime(), default=datetime.now)
     updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
 
@@ -256,8 +257,8 @@ class Result(db.Model):
     __tablename__ = 'results'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.String(512))
+    name = db.Column(db.String(8160), nullable=False)
+    description = db.Column(db.String(8160))
     positive = db.Column(db.Boolean, default=False)
     created_on = db.Column(db.DateTime(), default=datetime.now)
     updated_on = db.Column(db.DateTime(), default=datetime.now,  onupdate=datetime.now)
