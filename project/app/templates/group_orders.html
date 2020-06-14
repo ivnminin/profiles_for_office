@@ -38,12 +38,8 @@
                 <tbody>
                     {% for order in group_orders %}
                         <tr {% if not order.orders %}
-                            {% elif order.created_on | view_status_css %}
-                                {{ order.created_on | view_status_css | safe }}
-                            {% elif order.with_support %}
-                                style="background: #ff00d46b;"
                             {% else %}
-                                {{ order.status | view_status_css | safe }}
+                                {{ order | view_status_css | safe }}
                             {% endif %}>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.name }}</td>

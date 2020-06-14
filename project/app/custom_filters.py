@@ -21,19 +21,17 @@ def generate_custom_filter(app):
 
     def view_status_css(value):
 
-        if isinstance(value, datetime):
+        if app.config['STATUS_TYPE']['in_work'] == value.status:
             today = datetime.now()
-            delta = today - timedelta(days=100)
-            if value < delta:
+            delta = today - timedelta(days=60)
+            if value.created_on < delta:
                 return app.config['STATUS_TYPE_CSS']['in_work_long']
-
-        elif app.config['STATUS_TYPE']['in_work'] == value:
             return app.config['STATUS_TYPE_CSS']['in_work']
 
-        elif app.config['STATUS_TYPE']['closed'] == value:
+        elif app.config['STATUS_TYPE']['closed'] == value.status:
             return app.config['STATUS_TYPE_CSS']['closed']
 
-        elif app.config['STATUS_TYPE']['cancelled'] == value:
+        elif app.config['STATUS_TYPE']['cancelled'] == value.status:
             return app.config['STATUS_TYPE_CSS']['cancelled']
 
         return ''
