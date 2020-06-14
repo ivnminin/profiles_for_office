@@ -56,7 +56,11 @@
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                        <tr {{ order.group_order.status | view_status_css | safe}}>
+                        <tr
+                            {% if not order.group_order %}
+                            {% else %}
+                                {{ order.group_order | view_status_css | safe}}
+                            {% endif %}>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.user.full_name }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; min-width: 250px; border: 1px grey solid;">{{ order.name }}</td>
