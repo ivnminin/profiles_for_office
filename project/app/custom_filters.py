@@ -26,8 +26,9 @@ def generate_custom_filter(app):
             delta = today - timedelta(days=60)
             if value.created_on < delta:
                 return app.config['STATUS_TYPE_CSS']['in_work_long']
+            elif value.with_support:
+                return app.config['STATUS_TYPE_CSS']['with_support']
             return app.config['STATUS_TYPE_CSS']['in_work']
-
         elif app.config['STATUS_TYPE']['closed'] == value.status:
             return app.config['STATUS_TYPE_CSS']['closed']
 
