@@ -230,7 +230,7 @@ class GroupOrder(db.Model):
     __tablename__ = 'group_orders'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255))
     description = db.Column(db.String(512))
     status = db.Column(db.String(16),  default=app.config['STATUS_TYPE']['in_work'])
     with_support = db.Column(db.Boolean, default=False)
