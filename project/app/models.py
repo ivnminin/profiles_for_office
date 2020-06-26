@@ -257,7 +257,7 @@ class Result(db.Model):
     __tablename__ = 'results'
 
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(8160))
+    name = db.Column(db.String(8160), nullable=False)
     description = db.Column(db.String(8160))
     positive = db.Column(db.Boolean, default=False)
     created_on = db.Column(db.DateTime(), default=datetime.now)

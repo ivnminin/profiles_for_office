@@ -20,6 +20,7 @@
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='in_work') }}">В работе</a></p>
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='closed') }}">Закрытые</a></p>
                 <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='cancelled') }}">Отмененные</a></p>
+                <p style="padding: 0 20px; display: inline;"><a href="{{ url_for('group_orders', filter='with_support') }}">С поддержкой</a></p>
             </div>
             {% if group_orders %}
                 <table class="hover">
@@ -37,10 +38,8 @@
                 </thead>
                 <tbody>
                     {% for order in group_orders %}
-                        <tr {% if not order.orders %}
-                            {% else %}
-                                {{ order | view_status_css | safe }}
-                            {% endif %}>
+                        <tr {{ order | view_status_css | safe }}>
+
                             <td style="text-align: center; border: 1px grey solid;">{{ order.id }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.name }}</td>
                             <td style="word-wrap: break-word; word-break: break-all; border: 1px grey solid;">{{ order.description }}</td>
@@ -54,7 +53,7 @@
                                 {% endif %}
                             </td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.created_on.strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                            <td style="text-align: center; border: 1px grey solid; min-width: 100px">{% if not order.orders %} <span style="color: red"> Еще нет заявок </span> {% else %} {{ order.status | view_status }} {% endif %}</td>
+                            <td style="text-align: center; border: 1px grey solid; min-width: 100px">{% if not order.orders %} <span style="color: red"> В группе нет заявок </span> {% else %} {{ order.status | view_status }} {% endif %}</td>
                             <td style="text-align: center; border: 1px grey solid;">{{ order.user_performer.full_name }}</td>
                             <td style="text-align: center; border: 1px grey solid;"><a href="{{ url_for('.group_order', id=order.id) }}">Посмотреть{% if current_user.is_moderator %}, Редактировать{% endif %}</a></td>
                         </tr>

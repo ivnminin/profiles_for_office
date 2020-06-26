@@ -207,6 +207,9 @@ def group_orders():
     if filter == 'new':
         group_orders = db.session.query(GroupOrder).filter(GroupOrder.status == None)\
                                                    .order_by(db.desc(GroupOrder.created_on)).all()
+    elif filter == 'with_support':
+        group_orders = db.session.query(GroupOrder).filter(GroupOrder.with_support)\
+                                                   .order_by(db.desc(GroupOrder.created_on)).all()
     elif filter:
         group_orders = db.session.query(GroupOrder)\
                                  .filter(GroupOrder.status==filter)\
@@ -396,7 +399,7 @@ def add_consultation(id=None):
 
         if request.method == 'POST' and form.validate_on_submit():
 
-            consultation.name = form.title.dataform.title.data
+            consultation.name = form.title.data
             consultation.description = form.description.data
             consultation.organization = form.organization.data
             consultation.reg_number = form.reg_number.data

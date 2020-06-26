@@ -21,7 +21,9 @@ def generate_custom_filter(app):
 
     def view_status_css(value):
 
-        if app.config['STATUS_TYPE']['in_work'] == value.status:
+        if not value.orders and app.config['STATUS_TYPE']['cancelled'] != value.status:
+            return ''
+        elif app.config['STATUS_TYPE']['in_work'] == value.status:
             today = datetime.now()
             delta = today - timedelta(days=60)
             if value.created_on < delta:
