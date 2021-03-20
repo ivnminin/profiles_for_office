@@ -10,7 +10,7 @@ Flask-Dropzone==1.5.4
 Flask-Mail==0.9.1
 fpdf==1.7.2
 itsdangerous==1.1.0
-Jinja2==2.10.3
+Jinja2==2.11.3
 Mako==1.1.0
 MarkupSafe==1.1.1
 psycopg2==2.8.4
